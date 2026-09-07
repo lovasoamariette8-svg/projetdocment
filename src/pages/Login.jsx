@@ -2,21 +2,33 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import './Login.css'
 
-function Login() {
+function Register() {
   const navigate = useNavigate()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [darkMode, setDarkMode] = useState(true)
 
-  const handleLogin = (e) => {
+  const handleRegister = (e) => {
     e.preventDefault()
 
-    if (!username || !password) {
+    if (!username || !password || !confirmPassword) {
       alert('Veuillez remplir tous les champs.')
       return
     }
 
+    if (password !== confirmPassword) {
+      alert('Les mots de passe ne correspondent pas.')
+      return
+    }
+
+    if (password.length < 6) {
+      alert('Le mot de passe doit contenir au moins 6 caractères.')
+      return
+    }
+
+    // Compte créé -> connexion automatique
     sessionStorage.setItem('isLoggedIn', 'true')
 
     navigate('/dashboard')
@@ -25,6 +37,7 @@ function Login() {
   const handleCancel = () => {
     setUsername('')
     setPassword('')
+    setConfirmPassword('')
   }
 
   return (
@@ -53,17 +66,17 @@ function Login() {
 
 
         {/* TITRE */}
-        <h1>Bienvenue</h1>
+        <h1>Créer un compte</h1>
 
         <p className="login-subtitle">
-          Connectez-vous à votre espace administrateur
+          Inscrivez-vous pour accéder à votre espace administrateur
         </p>
 
 
-        {/* CARTE DE CONNEXION */}
+        {/* CARTE D'INSCRIPTION */}
         <div className="login-card">
 
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleRegister}>
 
             {/* EMAIL */}
             <div className="form-group">
@@ -101,13 +114,22 @@ function Login() {
             </div>
 
 
-            {/* MOT DE PASSE OUBLIÉ */}
-            <Link
-              to="/forgot-password"
-              className="forgot-password"
-            >
-              Mot de passe oublié ?
-            </Link>
+            {/* CONFIRMER MOT DE PASSE */}
+            <div className="form-group">
+
+              <label htmlFor="confirmPassword">
+                CONFIRMER LE MOT DE PASSE
+              </label>
+
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+
+            </div>
 
 
             {/* BOUTONS */}
@@ -117,7 +139,7 @@ function Login() {
                 type="submit"
                 className="btn-login"
               >
-                <span>Se connecter</span>
+                <span>S'inscrire</span>
                 <span>→</span>
               </button>
 
@@ -129,6 +151,23 @@ function Login() {
               >
                 Annuler
               </button>
+
+            </div>
+
+
+            {/* DÉJÀ UN COMPTE */}
+            <div className="create-account">
+
+              <span>
+                Vous avez déjà un compte ?
+              </span>
+
+              <Link
+                to="/login"
+                className="register-link"
+              >
+                Se connecter
+              </Link>
 
             </div>
 
@@ -152,4 +191,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Register

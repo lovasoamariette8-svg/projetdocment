@@ -42,6 +42,7 @@ function Results() {
       document1: c.document1,
       document2: c.document2,
       similarity: c.similarity,
+      status: c.status,
       commonNgrams: c.common_ngrams,
       totalNgramsDoc1: c.total_ngrams_doc1,
       totalNgramsDoc2: c.total_ngrams_doc2,
@@ -90,7 +91,32 @@ function Results() {
      STATUS
   ========================================== */
 
-  const getStatus = (similarity) => {
+  const getStatus = (result) => {
+    const status = result?.status;
+
+    if (status === "plagiat") {
+      return {
+        label: "Plagiat",
+        className: "plagiat",
+      };
+    }
+
+    if (status === "revision") {
+      return {
+        label: "Révision",
+        className: "revision",
+      };
+    }
+
+    if (status === "conforme") {
+      return {
+        label: "Conforme",
+        className: "conforme",
+      };
+    }
+
+    const similarity = result?.similarity;
+
     if (similarity >= 70) {
       return {
         label: "Plagiat",
@@ -148,17 +174,15 @@ function Results() {
   const totalComparisons = results.length;
 
   const plagiarismCount = results.filter(
-    (result) => result.similarity >= 70
+    (result) => result.status === "plagiat"
   ).length;
 
   const revisionCount = results.filter(
-    (result) =>
-      result.similarity >= 40 &&
-      result.similarity < 70
+    (result) => result.status === "revision"
   ).length;
 
   const conformCount = results.filter(
-    (result) => result.similarity < 40
+    (result) => result.status === "conforme"
   ).length;
 
 
@@ -170,7 +194,7 @@ function Results() {
     if (!selectedResult) return;
 
     const status = getStatus(
-      selectedResult.similarity
+      selectedResult
     );
 
     const content = `
@@ -473,7 +497,7 @@ TextSim - Détection de Similarité Textuelle
                     {filteredResults.map((result) => {
 
                       const status =
-                        getStatus(result.similarity);
+                        getStatus(result);
 
                       return (
 
@@ -781,7 +805,7 @@ TextSim - Détection de Similarité Textuelle
                   }}
                   className={
                     getStatus(
-                      selectedResult.similarity
+                      selectedResult
                     ).className
                   }
                 ></span>
@@ -1025,7 +1049,7 @@ TextSim - Détection de Similarité Textuelle
               <strong
                 className={
                   getStatus(
-                    selectedResult.similarity
+                    selectedResult
                   ).className
                 }
               >
@@ -1034,7 +1058,7 @@ TextSim - Détection de Similarité Textuelle
 
                 {
                   getStatus(
-                    selectedResult.similarity
+                    selectedResult
                   ).label
                 }
 

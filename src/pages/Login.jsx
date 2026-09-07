@@ -2,42 +2,42 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import './Login.css'
 
-function Register() {
+function Login() {
   const navigate = useNavigate()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [darkMode, setDarkMode] = useState(true)
 
-  const handleRegister = (e) => {
+  // Fampidiran-dresaka ho an'ny Se connecter
+  const handleLogin = (e) => {
     e.preventDefault()
 
-    if (!username || !password || !confirmPassword) {
+    if (!username || !password) {
       alert('Veuillez remplir tous les champs.')
       return
     }
 
-    if (password !== confirmPassword) {
-      alert('Les mots de passe ne correspondent pas.')
-      return
-    }
-
-    if (password.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères.')
-      return
-    }
-
-    // Compte créé -> connexion automatique
     sessionStorage.setItem('isLoggedIn', 'true')
+    navigate('/dashboard')
+  }
 
+  // Fampidiran-dresaka ho an'ny S'inscrire (Mankany amin'ny Dashboard ihany koa)
+  const handleRegister = (e) => {
+    e.preventDefault()
+
+    if (!username || !password) {
+      alert('Veuillez remplir tous les champs pour vous inscrire.')
+      return
+    }
+
+    sessionStorage.setItem('isLoggedIn', 'true')
     navigate('/dashboard')
   }
 
   const handleCancel = () => {
     setUsername('')
     setPassword('')
-    setConfirmPassword('')
   }
 
   return (
@@ -52,10 +52,8 @@ function Register() {
         <span className="material-symbols-outlined">
           {darkMode ? 'light_mode' : 'dark_mode'}
         </span>
-
         {darkMode ? 'Clair' : 'Sombre'}
       </button>
-
 
       <div className="login-container">
 
@@ -64,27 +62,22 @@ function Register() {
           TS
         </div>
 
-
         {/* TITRE */}
-        <h1>Créer un compte</h1>
-
+        <h1>Bienvenue</h1>
         <p className="login-subtitle">
-          Inscrivez-vous pour accéder à votre espace administrateur
+          Connectez-vous ou inscrivez-vous pour accéder à votre espace
         </p>
 
-
-        {/* CARTE D'INSCRIPTION */}
+        {/* CARTE DE CONNEXION / INSCRIPTION */}
         <div className="login-card">
 
-          <form onSubmit={handleRegister}>
+          <form>
 
             {/* EMAIL */}
             <div className="form-group">
-
               <label htmlFor="username">
                 ADRESSE E-MAIL
               </label>
-
               <input
                 id="username"
                 type="text"
@@ -92,17 +85,13 @@ function Register() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-
             </div>
-
 
             {/* MOT DE PASSE */}
             <div className="form-group">
-
               <label htmlFor="password">
                 MOT DE PASSE
               </label>
-
               <input
                 id="password"
                 type="password"
@@ -110,40 +99,40 @@ function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-
             </div>
 
+            {/* MOT DE PASSE OUBLIÉ */}
+            <Link
+              to="/forgot-password"
+              className="forgot-password"
+            >
+              Mot de passe oublié ?
+            </Link>
 
-            {/* CONFIRMER MOT DE PASSE */}
-            <div className="form-group">
+            {/* BOUTONS D'ACTION */}
+            <div className="login-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
-              <label htmlFor="confirmPassword">
-                CONFIRMER LE MOT DE PASSE
-              </label>
-
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-
-            </div>
-
-
-            {/* BOUTONS */}
-            <div className="login-buttons">
-
+              {/* BOKOTRA SE CONNECTER */}
               <button
                 type="submit"
                 className="btn-login"
+                onClick={handleLogin}
+              >
+                <span>Se connecter</span>
+                <span>→</span>
+              </button>
+
+              {/* BOKOTRA S'INSCRIRE (MITOVY LOKO AMIN'NY SE CONNECTER) */}
+              <button
+                type="button"
+                className="btn-login"
+                onClick={handleRegister}
               >
                 <span>S'inscrire</span>
                 <span>→</span>
               </button>
 
-
+              {/* BOKOTRA ANNULER */}
               <button
                 type="button"
                 className="btn-cancel"
@@ -154,28 +143,9 @@ function Register() {
 
             </div>
 
-
-            {/* DÉJÀ UN COMPTE */}
-            <div className="create-account">
-
-              <span>
-                Vous avez déjà un compte ?
-              </span>
-
-              <Link
-                to="/login"
-                className="register-link"
-              >
-                Se connecter
-              </Link>
-
-            </div>
-
           </form>
 
         </div>
-
-
         {/* RETOUR */}
         <button
           type="button"
@@ -191,4 +161,4 @@ function Register() {
   )
 }
 
-export default Register
+export default Login

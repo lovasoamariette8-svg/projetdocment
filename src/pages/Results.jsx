@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Download,
@@ -8,154 +8,83 @@ import {
   Copy,
   CheckCircle2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import api, { getErrorMessage } from "../api";
 import "./Results.css";
 
 function Results() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [search, setSearch] = useState("");
   const [selectedResult, setSelectedResult] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const results = [
-    {
-      id: 1,
-      document1: "document1.txt",
-      document2: "rapport_stage.docx",
-      similarity: 82,
-      commonNgrams: 420,
-      totalNgramsDoc1: 510,
-      totalNgramsDoc2: 620,
-      date: "01/09/2026",
-      analysisId: "AN-001",
+  // ==========================================
+  // MAPPING DES RÉSULTATS (backend)
+  // ==========================================
+  const mapComparison = (c) => {
+    const passages = (c.passages || []).map((p) => ({
+      id: p.order,
+      document1: c.document1,
+      document2: c.document2,
+      similarity: p.similarity,
+      text1: p.text1,
+      text2: p.text2,
+    }));
 
-      /* NOUVEAUX INFORMATIONS */
-      ngramSize: 3,
-      normalization: "Oui",
-      threshold: 70,
-      method: "N-gram",
-      matches: 24,
+    return {
+      id: c.id,
+      document1: c.document1,
+      document2: c.document2,
+      similarity: c.similarity,
+      commonNgrams: c.common_ngrams,
+      totalNgramsDoc1: c.total_ngrams_doc1,
+      totalNgramsDoc2: c.total_ngrams_doc2,
+      date: c.date,
+      analysisId: c.analysis_id,
+      ngramSize: c.ngram_size,
+      normalization: c.normalization,
+      threshold: c.threshold,
+      method: c.method,
+      matches: c.matches,
+      matchingPassages: passages,
+    };
+  };
 
-      matchingPassages: [
-        {
-          id: 1,
-          document1: "document1.txt",
-          document2: "rapport_stage.docx",
-          similarity: 91,
-          text1:
-            "L'analyse des données permet d'identifier les principales tendances du document.",
-          text2:
-            "L'analyse des données permet d'identifier les tendances principales du rapport.",
-        },
-        {
-          id: 2,
-          document1: "document1.txt",
-          document2: "rapport_stage.docx",
-          similarity: 84,
-          text1:
-            "Cette méthode permet de comparer efficacement les contenus textuels.",
-          text2:
-            "Cette méthode permet une comparaison efficace des contenus textuels.",
-        },
-        {
-          id: 3,
-          document1: "document1.txt",
-          document2: "rapport_stage.docx",
-          similarity: 76,
-          text1:
-            "Les résultats obtenus sont ensuite présentés sous forme de statistiques.",
-          text2:
-            "Les résultats sont présentés ensuite sous forme de statistiques.",
-        },
-      ],
-    },
+  // ==========================================
+  // CHARGEMENT DES RÉSULTATS (backend)
+  // ==========================================
+  useEffect(() => {
+    const analysisId = location.state?.analysisId;
 
-    {
-      id: 2,
-      document1: "document1.txt",
-      document2: "memoire.pdf",
-      similarity: 38,
-      commonNgrams: 180,
-      totalNgramsDoc1: 510,
-      totalNgramsDoc2: 760,
-      date: "01/09/2026",
-      analysisId: "AN-001",
+    const load = async () => {
+      setLoading(true);
+      try {
+        if (analysisId) {
+          const { data } = await api.get(`/analyses/${analysisId}/`);
+          setResults((data.comparisons || []).map(mapComparison));
+        } else {
+          const { data } = await api.get("/analyses/list/");
+          const all = [];
+          for (const analysis of data) {
+            all.push(...(analysis.comparisons || []).map(mapComparison));
+          }
+          setResults(all);
+        }
+      } catch (err) {
+        setError(getErrorMessage(err, "Impossible de charger les résultats."));
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      /* NOUVEAUX INFORMATIONS */
-      ngramSize: 3,
-      normalization: "Oui",
-      threshold: 70,
-      method: "N-gram",
-      matches: 9,
-
-      matchingPassages: [
-        {
-          id: 1,
-          document1: "document1.txt",
-          document2: "memoire.pdf",
-          similarity: 52,
-          text1:
-            "La comparaison des documents permet de mesurer leur niveau de similarité.",
-          text2:
-            "La comparaison permet de mesurer le niveau de similarité entre les documents.",
-        },
-        {
-          id: 2,
-          document1: "document1.txt",
-          document2: "memoire.pdf",
-          similarity: 43,
-          text1:
-            "Les données sont ensuite analysées afin de produire un résultat.",
-          text2:
-            "Les données sont analysées afin de produire les résultats.",
-        },
-      ],
-    },
-
-    {
-      id: 3,
-      document1: "rapport_stage.docx",
-      document2: "memoire.pdf",
-      similarity: 67,
-      commonNgrams: 350,
-      totalNgramsDoc1: 620,
-      totalNgramsDoc2: 760,
-      date: "02/09/2026",
-      analysisId: "AN-002",
-
-      /* NOUVEAUX INFORMATIONS */
-      ngramSize: 4,
-      normalization: "Oui",
-      threshold: 70,
-      method: "N-gram",
-      matches: 18,
-
-      matchingPassages: [
-        {
-          id: 1,
-          document1: "rapport_stage.docx",
-          document2: "memoire.pdf",
-          similarity: 74,
-          text1:
-            "Le système permet d'automatiser le traitement et l'analyse des documents.",
-          text2:
-            "Le système permet d'automatiser l'analyse et le traitement des documents.",
-        },
-        {
-          id: 2,
-          document1: "rapport_stage.docx",
-          document2: "memoire.pdf",
-          similarity: 68,
-          text1:
-            "Les résultats obtenus permettent de mieux comprendre les performances.",
-          text2:
-            "Les résultats permettent de comprendre les performances du système.",
-        },
-      ],
-    },
-  ];
+    load();
+  }, [location.state?.analysisId]);
 
   /* ==========================================
      STATUS
@@ -456,7 +385,35 @@ TextSim - Détection de Similarité Textuelle
 
             <div className="results-table-wrapper">
 
-              {filteredResults.length === 0 ? (
+              {loading ? (
+
+                <div className="results-empty">
+
+                  <h3>
+                    Chargement...
+                  </h3>
+
+                  <p>
+                    Récupération de vos résultats en cours.
+                  </p>
+
+                </div>
+
+              ) : error ? (
+
+                <div className="results-empty">
+
+                  <h3>
+                    Erreur
+                  </h3>
+
+                  <p>
+                    {error}
+                  </p>
+
+                </div>
+
+              ) : filteredResults.length === 0 ? (
 
                 <div className="results-empty">
 

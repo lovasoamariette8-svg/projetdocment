@@ -1,16 +1,58 @@
+import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
+import api, { getErrorMessage } from '../api'
 import './Dashboard.css'
 
 function Dashboard() {
-  const months = [
-    { month: 'Mars', conforme: 72, revision: 18, plagiat: 8 },
-    { month: 'Avril', conforme: 88, revision: 22, plagiat: 6 },
-    { month: 'Mai', conforme: 80, revision: 26, plagiat: 9 },
-    { month: 'Juin', conforme: 100, revision: 29, plagiat: 7 },
-    { month: 'Juil', conforme: 93, revision: 33, plagiat: 10 },
-    { month: 'Août', conforme: 108, revision: 37, plagiat: 13 },
+  const [stats, setStats] = useState({
+    total_documents: 0,
+    analysed: 0,
+    pending: 0,
+    plagiarism_alerts: 0,
+    recent_documents: [],
+    monthly_series: [],
+  })
+  const [error, setError] = useState('')
+  const [userName, setUserName] = useState('Admin')
+
+  useEffect(() => {
+    api
+      .get('/dashboard/')
+      .then(({ data }) => setStats(data))
+      .catch((err) =>
+        setError(getErrorMessage(err, 'Impossible de charger le tableau de bord.'))
+      )
+
+    api
+      .get('/auth/me/')
+      .then(({ data }) => {
+        const u = data.user || {};
+        const name = u.first_name || u.last_name || u.username || 'Admin';
+        setUserName(name.charAt(0).toUpperCase() + name.slice(1));
+      })
+      .catch(() => {})
+  }, [])
+
+  const months = (stats.monthly_series || []).map((item) => ({
+    month: item.month_fr || item.month,
+    conforme: item.conforme,
+    revision: item.revision,
+    plagiat: item.plagiat,
+  }))
+
+  // Force au moins un mois si vide pour garder le graphique vide mais visible
+  const chartMonths = months.length > 0 ? months : [
+    { month: 'Mars', conforme: 0, revision: 0, plagiat: 0 },
+    { month: 'Avril', conforme: 0, revision: 0, plagiat: 0 },
+    { month: 'Mai', conforme: 0, revision: 0, plagiat: 0 },
+    { month: 'Juin', conforme: 0, revision: 0, plagiat: 0 },
+    { month: 'Juil', conforme: 0, revision: 0, plagiat: 0 },
+    { month: 'Août', conforme: 0, revision: 0, plagiat: 0 },
   ]
+
+  const username = userName
+  const recentDocs = stats.recent_documents || []
 
   return (
     <div className="dashboard-layout">
@@ -29,9 +71,11 @@ function Dashboard() {
           {/* WELCOM */}
           <section className="welcome-card">
             <div>
-              <h1>Bienvenue, Admin</h1>
+              <h1>Bienvenue, {username}</h1>
               <p>
-                Vous avez 52 documents en attente d'analyse. Commencez dès maintenant.
+                {error
+                  ? 'Impossible de charger vos statistiques pour le moment.'
+                  : `Vous avez ${stats.pending} document(s) en attente d'analyse.`}
               </p>
             </div>
           </section>
@@ -43,9 +87,9 @@ function Dashboard() {
                 TOTAL DOCUMENTS
               </p>
 
-              <h3>0</h3>
+              <h3>{stats.total_documents}</h3>
               <span className="stat-positive">
-                ↗ +0% ce mois
+                ↗ ce mois
               </span>
             </div>
 
@@ -55,10 +99,10 @@ function Dashboard() {
                 ANALYSÉS
               </p>
 
-              <h3>0</h3>
+              <h3>{stats.analysed}</h3>
 
               <span className="stat-positive">
-                ↗ +0% ce mois
+                ↗ ce mois
               </span>
             </div>
 
@@ -68,10 +112,10 @@ function Dashboard() {
                 EN ATTENTE
               </p>
 
-              <h3>0</h3>
+              <h3>{stats.pending}</h3>
 
               <span className="stat-warning">
-                ↘ 0 nouveaux
+                ↘ nouveaux
               </span>
             </div>
 
@@ -81,7 +125,7 @@ function Dashboard() {
                 ALERTES PLAGIAT
               </p>
 
-              <h3>0</h3>
+              <h3>{stats.plagiarism_alerts}</h3>
 
               <span className="stat-danger">
                 À vérifier
@@ -136,7 +180,7 @@ function Dashboard() {
 
                 <div className="bars-container">
 
-                  {months.map((item) => (
+                  {chartMonths.map((item) => (
                     <div
                       className="month-column"
                       key={item.month}
@@ -229,76 +273,39 @@ function Dashboard() {
                 </div>
 
 
-                {/* DOCUMENT 1 */}
-                <div className="table-row">
-
-                  <strong>
-                    Rapport_Final_Projet.pdf
-                  </strong>
-
-                  <span>
-                    PDF
-                  </span>
-
-                  <span>
-                    <span className="status conform">
-                      Conforme (2%)
+                {/* DOCUMENTS RÉCENTS */}
+                {recentDocs.length === 0 ? (
+                  <div className="table-row">
+                    <span>
+                      Aucun document récent pour le moment.
                     </span>
-                  </span>
+                  </div>
+                ) : (
+                  recentDocs.map((doc) => (
+                    <div
+                      className="table-row"
+                      key={doc.id}
+                    >
+                      <strong>
+                        {doc.name}
+                      </strong>
 
-                  <span>
-                    31/08/2026
-                  </span>
+                      <span>
+                        {doc.type}
+                      </span>
 
-                </div>
+                      <span>
+                        <span className={`status ${doc.status === 'ready' ? 'conform' : 'review'}`}>
+                          {doc.status === 'ready' ? 'Prêt' : 'À extraire'}
+                        </span>
+                      </span>
 
-
-                {/* DOCUMENT 2 */}
-                <div className="table-row">
-
-                  <strong>
-                    Memoire_Licence_2.docx
-                  </strong>
-
-                  <span>
-                    DOCX
-                  </span>
-
-                  <span>
-                    <span className="status plagiarism">
-                      Plagiat (68%)
-                    </span>
-                  </span>
-
-                  <span>
-                    30/08/2026
-                  </span>
-
-                </div>
-
-
-                {/* DOCUMENT 3 */}
-                <div className="table-row">
-
-                  <strong>
-                    Analyse_Texte_V1.txt
-                  </strong>
-
-                  <span>
-                    TXT
-                  </span>
-
-                  <span>
-                    <span className="status review">
-                      À réviser (24%)
-                    </span>
-                  </span>
-
-                  <span>
-                    28/08/2026
-                  </span>
-
-                </div>
+                      <span>
+                        {doc.date}
+                      </span>
+                    </div>
+                  ))
+                )}
 
               </div>
 

@@ -21,6 +21,24 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
+class RegisterSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    email = serializers.EmailField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True)
+
+    def validate_username(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError('Ce nom d\'utilisateur est déjà pris.')
+        return value
+
+    def validate_email(self, value):
+        if value and User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError('Cet e-mail est déjà utilisé.')
+        return value
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

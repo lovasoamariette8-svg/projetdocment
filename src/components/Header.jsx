@@ -1,10 +1,31 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../api'
 import './Header.css'
 
 function Header() {
   const navigate = useNavigate()
+  const [userName, setUserName] = useState('Utilisateur')
+  const [initial, setInitial] = useState('U')
 
-  const handleLogout = () => {
+  useEffect(() => {
+    api
+      .get('/auth/me/')
+      .then(({ data }) => {
+        const u = data.user || {}
+        const name = u.first_name || u.last_name || u.username || 'Utilisateur'
+        setUserName(name)
+        setInitial(name.charAt(0).toUpperCase())
+      })
+      .catch(() => {})
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout/')
+    } catch {
+      // on ignore les erreurs réseau, on déconnecte quand même côté client
+    }
     sessionStorage.removeItem('isLoggedIn')
     navigate('/login')
   }
@@ -42,10 +63,10 @@ function Header() {
         {/* USER */}
         <div className="user-badge">
           <div className="user-avatar">
-            A
+            {initial}
           </div>
           <span>
-            Admin User
+            {userName}
           </span>
 
         </div>

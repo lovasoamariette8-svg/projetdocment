@@ -4,18 +4,22 @@ from .views import (
     AnalysisCreateView,
     AnalysisDetailView,
     AnalysisListView,
+    CsrfTokenView,
     DashboardView,
     DocumentDetailView,
     DocumentListCreateView,
     LoginView,
     LogoutView,
     MeView,
+    RegisterView,
     SettingsView,
 )
 
 urlpatterns = [
     # Auth
+    path('auth/csrf/', CsrfTokenView.as_view(), name='auth-csrf'),
     path('auth/login/', LoginView.as_view(), name='auth-login'),
+    path('auth/register/', RegisterView.as_view(), name='auth-register'),
     path('auth/logout/', LogoutView.as_view(), name='auth-logout'),
     path('auth/me/', MeView.as_view(), name='auth-me'),
 

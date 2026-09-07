@@ -5,6 +5,24 @@
 
 
 /* ==========================================
+   ERREUR
+========================================== */
+
+.settings-error {
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  border-radius: 8px;
+  background: rgba(220, 53, 69, 0.08);
+  color: #c62828;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+
+/* ==========================================
    GLOBAL
 ========================================== */
 

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Upload,
   FileText,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import api, { getErrorMessage } from "../api";
 import "./Documents.css";
 
 function Documents() {
@@ -27,6 +28,7 @@ function Documents() {
   const [search, setSearch] = useState("");
   const [formatFilter, setFormatFilter] = useState("Tous");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [selectedDocuments, setSelectedDocuments] = useState([]);
 
@@ -37,25 +39,31 @@ function Documents() {
   const allowedExtensions = ["txt", "docx", "pdf"];
 
   // ==========================================
-  // FORMAT FILE SIZE
+  // CHARGEMENT DES DOCUMENTS (backend)
   // ==========================================
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 octet";
-
-    const units = ["octets", "Ko", "Mo", "Go"];
-    const index = Math.floor(Math.log(bytes) / Math.log(1024));
-
-    return `${(bytes / Math.pow(1024, index)).toFixed(2)} ${units[index]}`;
-  };
-
-  // ==========================================
-  // COUNT WORDS
-  // ==========================================
-  const countWords = (text) => {
-    if (!text || !text.trim()) return 0;
-
-    return text.trim().split(/\s+/).length;
-  };
+  useEffect(() => {
+    api
+      .get("/documents/")
+      .then(({ data }) =>
+        setDocuments(
+          data.map((doc) => ({
+            id: doc.id,
+            name: doc.name,
+            size: doc.size,
+            sizeBytes: doc.size_bytes,
+            words: doc.words,
+            date: doc.date,
+            type: doc.type,
+            status: doc.status === "ready" ? "Prêt" : "À extraire",
+            textExtracted: doc.text_extracted,
+          }))
+        )
+      )
+      .catch((err) =>
+        setError(getErrorMessage(err, "Impossible de charger les documents."))
+      )
+      .finally(() => setLoading(false));
+  }, []);
 
   // ==========================================
   // IMPORT DOCUMENTS
@@ -67,7 +75,7 @@ function Documents() {
 
     setError("");
 
-    const newDocuments = [];
+    const uploaded = [];
 
     for (const file of files) {
       const extension = file.name.split(".").pop().toLowerCase();
@@ -94,64 +102,32 @@ function Documents() {
         continue;
       }
 
-      // Vérification doublon
-      const alreadyExists = documents.some(
-        (doc) => doc.name.toLowerCase() === file.name.toLowerCase()
-      );
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("name", file.name);
 
-      const alreadyAdded = newDocuments.some(
-        (doc) => doc.name.toLowerCase() === file.name.toLowerCase()
-      );
+        const { data } = await api.post("/documents/", formData);
 
-      if (alreadyExists || alreadyAdded) {
-        setError(`Le document "${file.name}" existe déjà.`);
-        continue;
+        uploaded.push({
+          id: data.id,
+          name: data.name,
+          size: data.size,
+          sizeBytes: data.size_bytes,
+          words: data.words,
+          date: data.date,
+          type: data.type,
+          status: data.status === "ready" ? "Prêt" : "À extraire",
+          textExtracted: data.text_extracted,
+        });
+        setError("");
+      } catch (err) {
+        setError(getErrorMessage(err, `Impossible d'importer "${file.name}".`));
       }
-
-      let content = "";
-      let words = 0;
-
-      // Lecture TXT
-      if (extension === "txt") {
-        try {
-          content = await file.text();
-          words = countWords(content);
-
-          if (!content.trim()) {
-            setError(`Le fichier "${file.name}" ne contient aucun texte.`);
-            continue;
-          }
-        } catch (err) {
-          setError(`Impossible de lire le fichier "${file.name}".`);
-          continue;
-        }
-      }
-
-      // DOCX / PDF
-      if (extension === "docx" || extension === "pdf") {
-        content = "";
-        words = 0;
-      }
-
-      const newDocument = {
-        id: `${Date.now()}-${Math.random()}`,
-        name: file.name,
-        size: formatFileSize(file.size),
-        sizeBytes: file.size,
-        words,
-        date: new Date().toLocaleDateString("fr-FR"),
-        type: extension.toUpperCase(),
-        file,
-        content,
-        textExtracted: extension === "TXT",
-        status: extension === "TXT" ? "Prêt" : "À extraire",
-      };
-
-      newDocuments.push(newDocument);
     }
 
-    if (newDocuments.length > 0) {
-      setDocuments((prev) => [...prev, ...newDocuments]);
+    if (uploaded.length > 0) {
+      setDocuments((prev) => [...prev, ...uploaded]);
     }
 
     // Reset input
@@ -161,7 +137,7 @@ function Documents() {
   // ==========================================
   // DELETE DOCUMENT
   // ==========================================
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const document = documents.find((doc) => doc.id === id);
 
     if (!document) return;
@@ -172,36 +148,46 @@ function Documents() {
 
     if (!confirmDelete) return;
 
-    setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+    try {
+      await api.delete(`/documents/${id}/`);
+      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
 
-    setSelectedDocuments((prev) =>
-      prev.filter((selectedId) => selectedId !== id)
-    );
+      setSelectedDocuments((prev) =>
+        prev.filter((selectedId) => selectedId !== id)
+      );
 
-    if (selectedDocument?.id === id) {
-      setSelectedDocument(null);
-      setPreviewContent("");
-      setShowPreview(false);
+      if (selectedDocument?.id === id) {
+        setSelectedDocument(null);
+        setPreviewContent("");
+        setShowPreview(false);
+      }
+      setError("");
+    } catch (err) {
+      setError(getErrorMessage(err, "Impossible de supprimer le document."));
     }
   };
 
   // ==========================================
   // DOWNLOAD DOCUMENT
   // ==========================================
-  const handleDownload = (document) => {
-    if (!document.file) return;
+  const handleDownload = async (document) => {
+    try {
+      const response = await api.get(`/documents/${document.id}/`, {
+        params: { action: "download" },
+        responseType: "blob",
+      });
 
-    const url = URL.createObjectURL(document.file);
-
-    const link = window.document.createElement("a");
-    link.href = url;
-    link.download = document.name;
-
-    window.document.body.appendChild(link);
-    link.click();
-
-    link.remove();
-    URL.revokeObjectURL(url);
+      const url = URL.createObjectURL(response.data);
+      const link = window.document.createElement("a");
+      link.href = url;
+      link.download = document.name;
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(getErrorMessage(err, "Impossible de télécharger le document."));
+    }
   };
 
   // ==========================================
@@ -212,20 +198,31 @@ function Documents() {
     setShowPreview(true);
     setPreviewContent("");
 
-    if (document.type === "TXT") {
-      try {
-        const text = await document.file.text();
-        setPreviewContent(text);
-      } catch (err) {
-        setPreviewContent("Impossible de prévisualiser ce document.");
+    try {
+      const { data } = await api.get(`/documents/${document.id}/`, {
+        params: { action: "preview" },
+      });
+
+      if (
+        data.text_extracted &&
+        data.content &&
+        data.content.trim()
+      ) {
+        setPreviewContent(data.content);
+      } else if (document.type === "TXT") {
+        setPreviewContent(data.content || "Aucun texte disponible.");
+      } else if (document.type === "PDF") {
+        setPreviewContent(
+          "La prévisualisation du contenu PDF sera disponible avec le module d'extraction PDF."
+        );
+      } else if (document.type === "DOCX") {
+        setPreviewContent(
+          "La prévisualisation du contenu DOCX sera disponible avec le module d'extraction DOCX."
+        );
       }
-    } else if (document.type === "PDF") {
+    } catch (err) {
       setPreviewContent(
-        "La prévisualisation du contenu PDF sera disponible avec le module d'extraction PDF."
-      );
-    } else if (document.type === "DOCX") {
-      setPreviewContent(
-        "La prévisualisation du contenu DOCX sera disponible avec le module d'extraction DOCX."
+        getErrorMessage(err, "Impossible de prévisualiser ce document.")
       );
     }
   };
@@ -520,7 +517,19 @@ function Documents() {
           {/* =====================================
               EMPTY STATE
           ===================================== */}
-          {documents.length === 0 ? (
+          {loading ? (
+            <div className="documents-empty">
+              <div className="empty-icon">
+                <Upload size={34} />
+              </div>
+
+              <h3>Chargement...</h3>
+
+              <p>
+                Récupération de vos documents en cours.
+              </p>
+            </div>
+          ) : documents.length === 0 ? (
             <div className="documents-empty">
               <div className="empty-icon">
                 <Upload size={34} />

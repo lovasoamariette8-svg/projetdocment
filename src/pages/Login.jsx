@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import api, { getErrorMessage, ensureCsrf } from '../api'
 import './Login.css'
 
 function Login() {
@@ -8,31 +9,60 @@ function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [darkMode, setDarkMode] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  // Fampidiran-dresaka ho an'ny Se connecter
-  const handleLogin = (e) => {
+  // Connexion réelle via le backend
+  const handleLogin = async (e) => {
     e.preventDefault()
+    setError('')
 
     if (!username || !password) {
       alert('Veuillez remplir tous les champs.')
       return
     }
 
-    sessionStorage.setItem('isLoggedIn', 'true')
-    navigate('/dashboard')
+    setLoading(true)
+    try {
+      await ensureCsrf()
+      await api.post('/auth/login/', { username, password })
+      sessionStorage.setItem('isLoggedIn', 'true')
+      navigate('/dashboard')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erreur lors de la connexion.'))
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Fampidiran-dresaka ho an'ny S'inscrire (Mankany amin'ny Dashboard ihany koa)
-  const handleRegister = (e) => {
-    e.preventDefault()
+  const [email, setEmail] = useState('')
+  const [isRegisterMode, setIsRegisterMode] = useState(false)
 
-    if (!username || !password) {
+  // Inscription réelle via le backend
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (!username || !email || !password) {
       alert('Veuillez remplir tous les champs pour vous inscrire.')
       return
     }
 
-    sessionStorage.setItem('isLoggedIn', 'true')
-    navigate('/dashboard')
+    setLoading(true)
+    try {
+      await ensureCsrf()
+      await api.post('/auth/register/', {
+        username,
+        password,
+        email,
+      })
+      sessionStorage.setItem('isLoggedIn', 'true')
+      navigate('/dashboard')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erreur lors de l\'inscription.'))
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleCancel = () => {
@@ -68,24 +98,47 @@ function Login() {
           Connectez-vous ou inscrivez-vous pour accéder à votre espace
         </p>
 
+        {/* ERREUR */}
+        {error && (
+          <div className="login-error">
+            {error}
+          </div>
+        )}
+
         {/* CARTE DE CONNEXION / INSCRIPTION */}
         <div className="login-card">
 
           <form>
 
-            {/* EMAIL */}
+            {/* NOM D'UTILISATEUR */}
             <div className="form-group">
               <label htmlFor="username">
-                ADRESSE E-MAIL
+                NOM D'UTILISATEUR
               </label>
               <input
                 id="username"
                 type="text"
-                placeholder="admin@entreprise.com"
+                placeholder="admin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
+
+            {/* EMAIL (inscription uniquement) */}
+            {isRegisterMode && (
+              <div className="form-group">
+                <label htmlFor="email">
+                  ADRESSE E-MAIL
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="admin@entreprise.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            )}
 
             {/* MOT DE PASSE */}
             <div className="form-group">
@@ -116,19 +169,21 @@ function Login() {
               <button
                 type="submit"
                 className="btn-login"
-                onClick={handleLogin}
+                onClick={isRegisterMode ? () => setIsRegisterMode(false) : handleLogin}
+                disabled={loading}
               >
-                <span>Se connecter</span>
+                <span>{isRegisterMode ? '← Retour à la connexion' : (loading ? 'Connexion...' : 'Se connecter')}</span>
                 <span>→</span>
               </button>
 
-              {/* BOKOTRA S'INSCRIRE (MITOVY LOKO AMIN'NY SE CONNECTER) */}
+              {/* BOKOTRA S'INSCRIRE */}
               <button
                 type="button"
                 className="btn-login"
-                onClick={handleRegister}
+                onClick={isRegisterMode ? handleRegister : () => setIsRegisterMode(true)}
+                disabled={loading}
               >
-                <span>S'inscrire</span>
+                <span>{isRegisterMode ? (loading ? 'Inscription...' : 'Confirmer l\'inscription') : 'S\'inscrire'}</span>
                 <span>→</span>
               </button>
 

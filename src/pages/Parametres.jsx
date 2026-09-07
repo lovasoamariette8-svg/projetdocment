@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Settings as SettingsIcon,
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import api, { getErrorMessage } from "../api";
 import "./Parametres.css";
 
 function Parametres() {
@@ -20,24 +21,49 @@ function Parametres() {
   const [normalisation, setNormalisation] = useState(true);
   const [seuil, setSeuil] = useState("70");
 
-  const handleSave = (e) => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    api
+      .get("/auth/me/")
+      .then(({ data }) => {
+        const u = data.user || {};
+        const s = data.settings || {};
+
+        setNom(u.first_name || "");
+        setPrenom(u.last_name || "");
+        setEmail(u.email || "");
+        setNgramSize(s.ngram_size != null ? String(s.ngram_size) : "3");
+        setNormalisation(s.normalisation != null ? s.normalisation : true);
+        setSeuil(s.alert_threshold != null ? String(s.alert_threshold) : "70");
+      })
+      .catch((err) =>
+        setError(getErrorMessage(err, "Impossible de charger vos paramètres."))
+      );
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    const settings = {
-      nom,
-      prenom,
-      email,
-      ngramSize,
-      normalisation,
-      seuil
-    };
+    try {
+      await api.put("/settings/", {
+        nom,
+        prenom,
+        email,
+        ngram_size: Number(ngramSize),
+        normalisation,
+        alert_threshold: Number(seuil),
+      });
 
-    localStorage.setItem(
-      "textsimSettings",
-      JSON.stringify(settings)
-    );
-
-    alert("Paramètres enregistrés avec succès !");
+      alert("Paramètres enregistrés avec succès !");
+    } catch (err) {
+      setError(getErrorMessage(err, "Erreur lors de l'enregistrement."));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,6 +86,12 @@ function Parametres() {
               de votre analyse de similarité.
             </p>
           </div>
+
+          {error && (
+            <div className="settings-error">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSave}>
 
@@ -343,9 +375,10 @@ function Parametres() {
               <button
                 type="submit"
                 className="save-button"
+                disabled={loading}
               >
                 <Save size={18} />
-                Enregistrer
+                {loading ? "Enregistrement..." : "Enregistrer"}
               </button>
 
             </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   Settings,
@@ -12,6 +12,7 @@ import {
 
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import api, { getErrorMessage } from "../api";
 import "./Analyse.css";
 
 function Analyse() {
@@ -19,31 +20,25 @@ function Analyse() {
   const location = useLocation();
 
   // ==========================================
-  // DOCUMENTS DISPONIBLES
+  // DOCUMENTS DISPONIBLES (backend)
   // ==========================================
-  // Pour le moment, données de démonstration.
-  // Plus tard: récupération depuis le backend/MySQL.
+  const [documents, setDocuments] = useState([]);
 
-  const [documents] = useState([
-    {
-      id: 1,
-      name: "document1.txt",
-      type: "TXT",
-      words: 1250,
-    },
-    {
-      id: 2,
-      name: "rapport_stage.docx",
-      type: "DOCX",
-      words: 2340,
-    },
-    {
-      id: 3,
-      name: "memoire.pdf",
-      type: "PDF",
-      words: 3120,
-    },
-  ]);
+  useEffect(() => {
+    api
+      .get("/documents/")
+      .then(({ data }) =>
+        setDocuments(
+          data.map((doc) => ({
+            id: doc.id,
+            name: doc.name,
+            type: doc.type,
+            words: doc.words,
+          }))
+        )
+      )
+      .catch(() => {});
+  }, []);
 
   // ==========================================
   // DOCUMENTS SÉLECTIONNÉS
@@ -53,7 +48,7 @@ function Analyse() {
     useState(
       location.state?.documentId
         ? [location.state.documentId]
-        : []
+        : location.state?.selectedDocuments || []
     );
 
   // ==========================================
@@ -163,45 +158,32 @@ function Analyse() {
     }
 
     // ========================================
-    // SIMULATION DE L'ENVOI BACKEND
+    // ENVOI RÉEL AU BACKEND
     // ========================================
 
     setLoading(true);
 
     try {
-      /*
-        Plus tard, remplacer cette partie par:
-
-        await axios.post(
-          "http://localhost:5000/api/analyses",
-          {
-            documentIds: selectedDocuments,
-            ngramSize,
-            normalization,
-            alertThreshold
-          }
-        );
-      */
-
-      await new Promise(
-        (resolve) =>
-          setTimeout(resolve, 1200)
-      );
+      const { data } = await api.post("/analyses/", {
+        documentIds: selectedDocuments,
+        ngramSize,
+        normalization,
+        alertThreshold,
+      });
 
       setSuccess(true);
 
-      /*
-        Après connexion au backend:
-
-        navigate("/results", {
-          state: {
-            analysisId: response.data.id
-          }
-        });
-      */
+      navigate("/results", {
+        state: {
+          analysisId: data.id,
+        },
+      });
     } catch (err) {
       setError(
-        "Une erreur est survenue lors du lancement de l'analyse."
+        getErrorMessage(
+          err,
+          "Une erreur est survenue lors du lancement de l'analyse."
+        )
       );
     } finally {
       setLoading(false);
@@ -321,10 +303,8 @@ function Analyse() {
                 </strong>
 
                 <span>
-                  Les paramètres sont
-                  correctement configurés.
-                  Le traitement peut être
-                  effectué par le backend.
+                  L'analyse a été lancée et les
+                  résultats sont disponibles.
                 </span>
 
               </div>

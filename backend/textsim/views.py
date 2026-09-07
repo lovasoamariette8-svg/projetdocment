@@ -1,6 +1,8 @@
 import os
 from datetime import timedelta
 
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Count, Q
 from django.http import FileResponse, HttpResponse
@@ -10,6 +12,17 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class CsrfTokenView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        from django.middleware.csrf import get_token
+        return Response({'csrfToken': get_token(request)})
 
 from .models import Analysis, AnalysisSettings, Comparison, Document, MatchingPassage
 from .serializers import (
@@ -19,6 +32,7 @@ from .serializers import (
     DocumentSerializer,
     DocumentUploadSerializer,
     LoginSerializer,
+    RegisterSerializer,
     StartAnalysisSerializer,
     UserSerializer,
 )
@@ -43,6 +57,34 @@ class LoginView(APIView):
             'user': UserSerializer(user).data,
             'message': 'Connexion réussie.',
         })
+
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.create_user(
+            username=serializer.validated_data['username'],
+            email=serializer.validated_data.get('email', ''),
+            password=serializer.validated_data['password'],
+            first_name=serializer.validated_data.get('first_name', ''),
+            last_name=serializer.validated_data.get('last_name', ''),
+        )
+        AnalysisSettings.objects.get_or_create(user=user)
+
+        from django.contrib.auth import login
+        login(request, user)
+
+        return Response(
+            {
+                'user': UserSerializer(user).data,
+                'message': 'Compte créé avec succès.',
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LogoutView(APIView):

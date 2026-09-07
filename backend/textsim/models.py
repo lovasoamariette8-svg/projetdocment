@@ -3,6 +3,30 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
+class Folder(models.Model):
+    """Dossier pour organiser les documents d'un utilisateur."""
+
+    name = models.CharField(max_length=255, verbose_name="Nom du dossier")
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='folders',
+        verbose_name="Créé par",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ['name', 'created_by']
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def document_count(self):
+        return self.documents.count()
+
+
 class Document(models.Model):
     """Fichier importé par un utilisateur (TXT, DOCX, PDF)."""
 
@@ -23,6 +47,14 @@ class Document(models.Model):
         choices=STATUS_CHOICES,
         default='pending',
         verbose_name="Statut",
+    )
+    folder = models.ForeignKey(
+        Folder,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='documents',
+        verbose_name="Dossier",
     )
     uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="Date d'importation")
     uploaded_by = models.ForeignKey(

@@ -147,6 +147,217 @@
   color: #94a3b8;
 }
 
+.search-box-icon {
+  flex-shrink: 0;
+
+  color: #64748b;
+
+  margin-right: 7px;
+}
+
+
+/* =====================================================
+   SEARCH RESULTS
+===================================================== */
+
+.search-wrap {
+  position: relative;
+}
+
+.search-results-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+
+  width: 440px;
+
+  max-height: 420px;
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.12),
+    0 2px 8px rgba(15, 23, 42, 0.06);
+
+  z-index: 60;
+}
+
+.search-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #eef2f7;
+
+  color: #64748b;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.search-results-close {
+  width: 26px;
+  height: 26px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: #64748b;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.search-results-close:hover {
+  background: #f1f5f9;
+
+  color: #0f172a;
+}
+
+.search-results-error {
+  padding: 16px 14px;
+
+  color: #b91c1c;
+
+  font-size: 12px;
+}
+
+.search-results-empty {
+  padding: 20px 14px;
+
+  color: #94a3b8;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+.search-results-list {
+  margin: 0;
+  padding: 6px;
+
+  list-style: none;
+
+  overflow-y: auto;
+}
+
+.search-result-item {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  padding: 10px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.search-result-item:hover {
+  background: #f8fafc;
+}
+
+.search-result-type {
+  width: 44px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 6px;
+
+  background: #e0f2fe;
+
+  color: #0369a1;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.3px;
+}
+
+.search-result-body {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.search-result-name {
+  overflow: hidden;
+
+  color: #0f172a;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-result-meta {
+  color: #64748b;
+
+  font-size: 11px;
+}
+
+.search-result-snippet {
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  color: #475569;
+
+  font-size: 12px;
+
+  line-height: 1.55;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.search-result-snippet mark {
+  padding: 0 2px;
+
+  border-radius: 3px;
+
+  background: #fef08a;
+
+  color: #0f172a;
+}
+
 
 /* =====================================================
    THEME BUTTON
@@ -405,7 +616,7 @@
 
 @media (max-width: 800px) {
 
-  .search-box {
+  .search-wrap {
     display: none;
   }
 

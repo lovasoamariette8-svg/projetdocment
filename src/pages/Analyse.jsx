@@ -12,6 +12,7 @@ import {
 
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 import api, { getErrorMessage } from "../api";
 import "./Analyse.css";
 
@@ -216,6 +217,8 @@ function Analyse() {
       ===================================== */}
 
       <main className="analyse-content">
+
+        <Header />
 
         <div className="analyse-page">
 

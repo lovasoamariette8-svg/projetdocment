@@ -6,8 +6,13 @@ from .views import (
     AnalysisListView,
     CsrfTokenView,
     DashboardView,
+    DocumentBulkMoveView,
     DocumentDetailView,
     DocumentListCreateView,
+    DocumentMoveView,
+    DocumentSearchView,
+    FolderDetailView,
+    FolderListCreateView,
     LoginView,
     LogoutView,
     MeView,
@@ -25,7 +30,14 @@ urlpatterns = [
 
     # Documents
     path('documents/', DocumentListCreateView.as_view(), name='document-list'),
+    path('documents/search/', DocumentSearchView.as_view(), name='document-search'),
     path('documents/<int:pk>/', DocumentDetailView.as_view(), name='document-detail'),
+    path('documents/<int:pk>/move/', DocumentMoveView.as_view(), name='document-move'),
+    path('documents/move/', DocumentBulkMoveView.as_view(), name='documents-move'),
+
+    # Dossiers
+    path('folders/', FolderListCreateView.as_view(), name='folder-list'),
+    path('folders/<int:pk>/', FolderDetailView.as_view(), name='folder-detail'),
 
     # Analyses
     path('analyses/', AnalysisCreateView.as_view(), name='analysis-create'),

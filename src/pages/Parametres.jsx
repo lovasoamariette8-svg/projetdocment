@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 import api, { getErrorMessage } from "../api";
 import "./Parametres.css";
 
@@ -74,6 +75,8 @@ function Parametres() {
 
       {/* MAIN */}
       <main className="settings-content">
+
+        <Header />
 
         <div className="settings-page">
 

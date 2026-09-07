@@ -4,7 +4,6 @@ from datetime import timedelta
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models import Count, Q
 from django.http import FileResponse, HttpResponse
 from django.utils import timezone
 from rest_framework import status
@@ -24,13 +23,14 @@ class CsrfTokenView(APIView):
         from django.middleware.csrf import get_token
         return Response({'csrfToken': get_token(request)})
 
-from .models import Analysis, AnalysisSettings, Comparison, Document, MatchingPassage
+from .models import Analysis, AnalysisSettings, Comparison, Document, Folder, MatchingPassage
 from .serializers import (
     AnalysisSerializer,
     AnalysisSettingsSerializer,
     ComparisonSerializer,
     DocumentSerializer,
     DocumentUploadSerializer,
+    FolderSerializer,
     LoginSerializer,
     RegisterSerializer,
     StartAnalysisSerializer,
@@ -127,6 +127,13 @@ class DocumentListCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        folder = serializer.validated_data.get('folder')
+        if folder and folder.created_by != request.user:
+            return Response(
+                {'detail': 'Dossier introuvable.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         document = serializer.save(name=name, uploaded_by=request.user)
 
         try:
@@ -152,6 +159,58 @@ class DocumentListCreateView(APIView):
             DocumentSerializer(document).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+def _build_snippet(content, q, window=60, max_len=220):
+    """Extrait un extrait du texte autour de la première occurrence du terme."""
+    content = content or ''
+    low = content.lower()
+    idx = low.find(q.lower())
+    if idx == -1:
+        idx = 0
+    start = max(0, idx - window)
+    end = min(len(content), start + max_len)
+    snippet = content[start:end]
+    prefix = '…' if start > 0 else ''
+    suffix = '…' if end < len(content) else ''
+    return f"{prefix}{snippet}{suffix}"
+
+
+class DocumentSearchView(APIView):
+    def get(self, request):
+        q = request.query_params.get('q', '').strip()
+        if not q or len(q) < 2:
+            return Response([])
+
+        docs = (
+            Document.objects.filter(uploaded_by=request.user)
+            .exclude(content='')
+        )
+
+        direct_ids = set(docs.filter(content__icontains=q).values_list('id', flat=True))
+
+        norm_q = normalize_text(q, mode='full')
+        accent_ids = set()
+        if norm_q:
+            accent_ids = set(
+                doc.id
+                for doc in docs.exclude(id__in=direct_ids)
+                if norm_q in normalize_text(doc.content, mode='full')
+            )
+
+        results = []
+        for doc in docs.filter(id__in=(direct_ids | accent_ids)):
+            results.append({
+                'id': doc.id,
+                'name': doc.name,
+                'type': doc.file_extension.upper(),
+                'size': doc.size_display,
+                'date': doc.uploaded_at_display,
+                'status': doc.status,
+                'snippet': _build_snippet(doc.content, q),
+            })
+
+        return Response(results)
 
 
 class DocumentDetailView(APIView):
@@ -193,6 +252,120 @@ class DocumentDetailView(APIView):
         document.file.delete(save=False)
         document.delete()
         return Response({'message': 'Document supprimé.'})
+
+
+# =======================================================================
+# Dossiers
+# =======================================================================
+
+class FolderListCreateView(APIView):
+    def get(self, request):
+        folders = Folder.objects.filter(created_by=request.user)
+        return Response(FolderSerializer(folders, many=True).data)
+
+    def post(self, request):
+        name = request.data.get('name', '').strip()
+        if not name:
+            return Response(
+                {'detail': 'Le nom du dossier est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if Folder.objects.filter(created_by=request.user, name__iexact=name).exists():
+            return Response(
+                {'detail': f'Un dossier nommé "{name}" existe déjà.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder = Folder.objects.create(name=name, created_by=request.user)
+        return Response(
+            FolderSerializer(folder).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class FolderDetailView(APIView):
+    def _get_folder(self, request, pk):
+        return Folder.objects.filter(pk=pk, created_by=request.user).first()
+
+    def patch(self, request, pk):
+        folder = self._get_folder(request, pk)
+        if not folder:
+            return Response({'detail': 'Dossier introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        name = request.data.get('name', '').strip()
+        if not name:
+            return Response(
+                {'detail': 'Le nom du dossier est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if Folder.objects.filter(created_by=request.user, name__iexact=name).exclude(pk=pk).exists():
+            return Response(
+                {'detail': f'Un dossier nommé "{name}" existe déjà.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder.name = name
+        folder.save()
+        return Response(FolderSerializer(folder).data)
+
+    def delete(self, request, pk):
+        folder = self._get_folder(request, pk)
+        if not folder:
+            return Response({'detail': 'Dossier introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        Document.objects.filter(folder=folder).update(folder=None)
+        folder.delete()
+        return Response({'message': 'Dossier supprimé.'})
+
+
+class DocumentMoveView(APIView):
+    def post(self, request, pk):
+        document = Document.objects.filter(pk=pk, uploaded_by=request.user).first()
+        if not document:
+            return Response({'detail': 'Document introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        folder_id = request.data.get('folder_id')
+
+        if folder_id is not None:
+            folder = Folder.objects.filter(pk=folder_id, created_by=request.user).first()
+            if not folder:
+                return Response({'detail': 'Dossier introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+            document.folder = folder
+        else:
+            document.folder = None
+
+        document.save()
+        return Response(DocumentSerializer(document).data)
+
+
+class DocumentBulkMoveView(APIView):
+    def post(self, request):
+        document_ids = request.data.get('document_ids', [])
+        folder_id = request.data.get('folder_id')
+
+        if not document_ids:
+            return Response(
+                {'detail': 'Aucun document sélectionné.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        documents = Document.objects.filter(id__in=document_ids, uploaded_by=request.user)
+        if documents.count() != len(document_ids):
+            return Response(
+                {'detail': 'Un ou plusieurs documents sont introuvables.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        folder = None
+        if folder_id is not None:
+            folder = Folder.objects.filter(pk=folder_id, created_by=request.user).first()
+            if not folder:
+                return Response({'detail': 'Dossier introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        documents.update(folder=folder)
+        return Response({'message': f'{documents.count()} document(s) déplacé(s).'})
 
 
 # =======================================================================

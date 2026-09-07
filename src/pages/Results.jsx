@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 import api, { getErrorMessage } from "../api";
 import "./Results.css";
 
@@ -261,6 +262,8 @@ TextSim - Détection de Similarité Textuelle
 
 
       <main className="results-content">
+
+        <Header />
 
         <div className="results-page">
 

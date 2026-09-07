@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Analysis, AnalysisSettings, Comparison, Document, MatchingPassage
+from .models import Analysis, AnalysisSettings, Comparison, Document, Folder, MatchingPassage
 
 
 # =======================================================================
@@ -49,18 +49,30 @@ class UserSerializer(serializers.ModelSerializer):
 # Documents
 # =======================================================================
 
+class FolderSerializer(serializers.ModelSerializer):
+    document_count = serializers.IntegerField(read_only=True, source='documents.count')
+
+    class Meta:
+        model = Folder
+        fields = ['id', 'name', 'created_at', 'document_count']
+        read_only_fields = ['id', 'created_at']
+
+
 class DocumentSerializer(serializers.ModelSerializer):
     size = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     file_name = serializers.SerializerMethodField()
     type = serializers.SerializerMethodField()
     words = serializers.IntegerField(source='word_count', read_only=True)
+    folder_id = serializers.IntegerField(read_only=True)
+    folder_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Document
         fields = [
             'id', 'name', 'file_name', 'size', 'size_bytes',
             'words', 'date', 'type', 'text_extracted', 'status', 'uploaded_at',
+            'folder_id', 'folder_name',
         ]
 
     def get_size(self, obj):
@@ -76,11 +88,22 @@ class DocumentSerializer(serializers.ModelSerializer):
     def get_type(self, obj):
         return obj.file_extension.upper()
 
+    def get_folder_name(self, obj):
+        return obj.folder.name if obj.folder else None
+
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
+    folder_id = serializers.PrimaryKeyRelatedField(
+        queryset=Folder.objects.all(),
+        source='folder',
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+
     class Meta:
         model = Document
-        fields = ['id', 'name', 'file', 'uploaded_at']
+        fields = ['id', 'name', 'file', 'folder_id', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
 
     def validate_file(self, value):

@@ -64,7 +64,7 @@ function Dashboard() {
       <main className="dashboard-content">
 
         {/* HEADER */}
-        <Header />
+        <Header showTitle />
 
         <div className="dashboard-body">
 

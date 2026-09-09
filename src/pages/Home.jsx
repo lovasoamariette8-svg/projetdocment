@@ -8,7 +8,11 @@ function Home() {
   // Édition claire par défaut ; encre sur papier le soir
   const [darkMode, setDarkMode] = useState(false)
 
-  const edition = 'Paris, septembre 2026 — N° 03'
+  const edition = new Date().toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 
   return (
     <div className={`home-page ${darkMode ? 'dark-mode' : 'light-mode'}`}>

@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models import Analysis, AnalysisSettings, Comparison, Document, Folder, MatchingPassage
@@ -43,6 +44,95 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+
+class RegisterVerifySerializer(serializers.Serializer):
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate_username(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError('Ce nom d\'utilisateur est déjà pris.')
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError('Cet e-mail est déjà utilisé.')
+        return value
+
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except Exception as exc:
+            messages = getattr(exc, 'messages', None) or [str(exc)]
+            raise serializers.ValidationError(' '.join(messages))
+        return value
+
+
+class RegisterConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField()
+
+    def validate_code(self, value):
+        value = (value or '').strip()
+        if len(value) != 6:
+            raise serializers.ValidationError(
+                'Le code de vérification doit contenir 6 caractères.'
+            )
+        return value
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    username = serializers.CharField()
+
+    def validate_username(self, value):
+        value = (value or '').strip()
+        if not value:
+            raise serializers.ValidationError(
+                'Veuillez renseigner votre identifiant ou votre e-mail.'
+            )
+        return value
+
+
+class PasswordResetVerifySerializer(serializers.Serializer):
+    username = serializers.CharField()
+    code = serializers.CharField()
+
+    def validate_code(self, value):
+        value = (value or '').strip()
+        if len(value) != 6:
+            raise serializers.ValidationError(
+                'Le code de récupération doit contenir 6 caractères.'
+            )
+        return value
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    code = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_code(self, value):
+        value = (value or '').strip()
+        if len(value) != 6:
+            raise serializers.ValidationError(
+                'Le code de récupération doit contenir 6 caractères.'
+            )
+        return value
+
+    def validate_new_password(self, value):
+        identifier = self.initial_data.get('username', '')
+        user = (
+            User.objects.filter(username__iexact=identifier).first()
+            or User.objects.filter(email__iexact=identifier).first()
+        )
+        try:
+            validate_password(value, user=user)
+        except Exception as exc:
+            messages = getattr(exc, 'messages', None) or [str(exc)]
+            raise serializers.ValidationError(' '.join(messages))
+        return value
 
 
 # =======================================================================

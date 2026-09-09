@@ -1,1769 +1,627 @@
-/* =====================================================
-   TEXTSIM - DASHBOARD
-   SOFT WHITE / DARK TEXT / NATURAL
-===================================================== */
+/* TEXTSIM - TABLEAU DE BORD
+   Édition « Papier & Presse » : encre, filets, serif. */
 
-
-/* =====================================================
-   DESIGN SYSTEM
-===================================================== */
-
-:root {
-
-  /* =========================
-     BACKGROUND
-  ========================= */
-
-  --bg-main: #f1f3f5;
-
-  --bg-soft: #f5f7f8;
-
-  --bg-soft-2: #f8f9fa;
-
-
-  /* =========================
-     CARDS / SURFACES
-  ========================= */
-
-  --bg-surface: #f8fafb;
-
-  --bg-surface-alt: #f5f7f9;
-
-  --bg-surface-hover: #f1f4f6;
-
-
-  /* =========================
-     BORDERS
-  ========================= */
-
-  --border-color: #dfe4e8;
-
-  --border-color-hover: #d3d9de;
-
-  --border-color-soft: #e9edf0;
-
-
-  /* =========================
-     BLUE ACCENT
-  ========================= */
-
-  --color-accent: #16739f;
-
-  --color-accent-hover: #125f84;
-
-  --color-accent-light: #eaf3f7;
-
-  --color-accent-border: #cfe0e8;
-
-
-  /* =========================
-     DARK TEXT
-  ========================= */
-
-  --text-primary: #17202a;
-
-  --text-secondary: #25313c;
-
-  --text-muted: #3f4b56;
-
-  --text-subtle: #596570;
-
-
-  /* =========================
-     STATUS
-  ========================= */
-
-  --status-conform-bg: #edf6ef;
-
-  --status-conform-border: #d0e4d4;
-
-  --status-conform-text: #3c704b;
-
-
-  --status-review-bg: #f8f5eb;
-
-  --status-review-border: #e7ddc0;
-
-  --status-review-text: #75632e;
-
-
-  --status-plagiat-bg: #f8eeee;
-
-  --status-plagiat-border: #e7d0d0;
-
-  --status-plagiat-text: #984747;
-
-
-  /* =========================
-     LAYOUT
-  ========================= */
-
-  --sidebar-width: 244px;
-}
-
-
-/* =====================================================
-   GLOBAL RESET
-===================================================== */
-
-*,
-*::before,
-*::after {
+.dashboard-layout,
+.dashboard-layout *,
+.dashboard-layout *::before,
+.dashboard-layout *::after {
   box-sizing: border-box;
 }
 
-
-html,
-body,
-#root {
-  margin: 0;
-
-  padding: 0;
-
-  min-height: 100%;
-}
-
-
-body {
-  background:
-    var(--bg-main);
-
-  color:
-    var(--text-primary);
-
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Arial,
-    sans-serif;
-
-  -webkit-font-smoothing: antialiased;
-}
-
-
-/* =====================================================
-   MAIN DASHBOARD
-===================================================== */
-
 .dashboard-layout {
-  width: 100%;
-
   min-height: 100vh;
-
-  display: flex;
-
-  background:
-    var(--bg-main);
-
-  color:
-    var(--text-primary);
+  width: 100%;
+  background: var(--paper, #f4f0e7);
+  color: var(--ink, #232019);
+  font-family: var(--font-body, "Source Sans 3", Arial, sans-serif);
 }
-
-
-/* =====================================================
-   MAIN CONTENT
-===================================================== */
 
 .dashboard-content {
-  flex: 1;
-
-  min-width: 0;
-
   min-height: 100vh;
-
-  margin-left:
-    var(--sidebar-width);
-
-  background:
-    var(--bg-main);
-
+  margin-left: var(--sidebar-width, 244px);
+  background: var(--paper, #f4f0e7);
   overflow-x: hidden;
-
-  transition:
-    margin-left 0.25s ease;
 }
-
-
-/* =====================================================
-   DASHBOARD BODY
-===================================================== */
 
 .dashboard-body {
-  width: 100%;
-
-  padding:
-    0
-    32px
-    40px;
+  max-width: 1250px;
+  padding: 30px 36px 54px;
 }
 
+/* ============ BARRE DE THÈME ============ */
+.dashboard-topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
 
-/* =====================================================
-   WELCOME CARD
-   CENTERED
-===================================================== */
+.dashboard-theme-btn {
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong, #b6ab94);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink-soft, #565045);
+  font-family: var(--font-body, "Source Sans 3", Arial, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
 
+.dashboard-theme-btn:hover {
+  border-color: var(--ink, #232019);
+  color: var(--ink, #232019);
+}
+
+.dashboard-theme-btn .material-symbols-outlined {
+  font-size: 17px;
+  line-height: 1;
+}
+
+/* ============ ACCUEIL DU READER ============ */
 .welcome-card {
-  position: relative;
-
-  width: 100%;
-
-  min-height: 118px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding:
-    24px
-    26px;
-
-  margin-bottom: 22px;
-
+  margin-bottom: 26px;
+  padding: 20px 24px;
+  border-left: 3px solid var(--accent, #b23a2c);
+  border-bottom: 1px solid var(--line-strong, #b6ab94);
   background:
-    var(--bg-surface);
-
-  border:
-    1px solid var(--border-color);
-
-  border-radius: 10px;
-
-  overflow: hidden;
-
-  box-shadow: none;
-
-  text-align: center;
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(35, 32, 25, 0.045) 23px 24px),
+    var(--card, #fbf8f1);
 }
-
-
-/* =====================================================
-   REMOVE DECORATION
-===================================================== */
-
-.welcome-card::before,
-.welcome-card::after {
-  display: none;
-
-  content: none;
-}
-
-
-/* =====================================================
-   WELCOME CONTENT
-===================================================== */
-
-.welcome-card > div {
-  width: 100%;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-}
-
-
-/* =====================================================
-   WELCOME TITLE
-===================================================== */
 
 .welcome-card h1 {
-  margin:
-    0
-    0
-    7px;
-
-  color:
-    var(--text-primary);
-
-  font-size: 23px;
-
-  font-weight: 700;
-
-  line-height: 1.3;
-
-  letter-spacing: -0.35px;
-
-  text-align: center;
+  margin: 0 0 6px;
+  color: var(--ink, #232019);
+  font-family: var(--font-display, Fraunces, Georgia, serif);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
-
-
-/* =====================================================
-   WELCOME DESCRIPTION
-===================================================== */
 
 .welcome-card p {
   margin: 0;
-
-  max-width: 650px;
-
-  color:
-    var(--text-muted);
-
-  font-size: 11px;
-
-  font-weight: 400;
-
+  color: var(--ink-soft, #565045);
+  font-size: 13px;
   line-height: 1.6;
-
-  text-align: center;
 }
 
-
-/* =====================================================
-   DASHBOARD TITLE
-===================================================== */
-
-.dashboard-title {
-  display: inline-flex;
-
-  align-items: center;
-
-  flex-wrap: wrap;
-
-  color:
-    var(--text-primary);
-}
-
-
-/* =====================================================
-   TITLE ANIMATION
-===================================================== */
-
-.dashboard-title span {
-  display: inline-block;
-
-  opacity: 0;
-
-  transform:
-    translateY(7px);
-
-  animation:
-    dashboardLetterIn
-    0.4s
-    cubic-bezier(0.16, 1, 0.3, 1)
-    forwards;
-}
-
-
-.dashboard-title span:nth-child(1) {
-  animation-delay: 0.04s;
-}
-
-.dashboard-title span:nth-child(2) {
-  animation-delay: 0.08s;
-}
-
-.dashboard-title span:nth-child(3) {
-  animation-delay: 0.12s;
-}
-
-.dashboard-title span:nth-child(4) {
-  animation-delay: 0.16s;
-}
-
-.dashboard-title span:nth-child(5) {
-  animation-delay: 0.20s;
-}
-
-.dashboard-title span:nth-child(6) {
-  animation-delay: 0.24s;
-}
-
-.dashboard-title span:nth-child(7) {
-  animation-delay: 0.28s;
-}
-
-.dashboard-title span:nth-child(8) {
-  animation-delay: 0.32s;
-}
-
-.dashboard-title span:nth-child(9) {
-  animation-delay: 0.36s;
-}
-
-.dashboard-title span:nth-child(10) {
-  animation-delay: 0.40s;
-}
-
-.dashboard-title span:nth-child(11) {
-  animation-delay: 0.44s;
-}
-
-.dashboard-title span:nth-child(12) {
-  animation-delay: 0.48s;
-}
-
-.dashboard-title span:nth-child(13) {
-  animation-delay: 0.52s;
-}
-
-.dashboard-title span:nth-child(14) {
-  animation-delay: 0.56s;
-}
-
-.dashboard-title span:nth-child(15) {
-  animation-delay: 0.60s;
-}
-
-.dashboard-title span:nth-child(16) {
-  animation-delay: 0.64s;
-}
-
-
-/* =====================================================
-   TITLE ANIMATION
-===================================================== */
-
-@keyframes dashboardLetterIn {
-
-  0% {
-    opacity: 0;
-
-    transform:
-      translateY(7px);
-  }
-
-  100% {
-    opacity: 1;
-
-    transform:
-      translateY(0);
-  }
-}
-
-
-/* =====================================================
-   STATISTICS GRID
-===================================================== */
-
+/* ============ STATISTIQUES ============ */
 .statistics-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
-  gap: 15px;
-
-  margin-bottom: 24px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
 }
-
-
-/* =====================================================
-   STAT CARD
-===================================================== */
 
 .stat-card {
   position: relative;
-
-  min-width: 0;
-
-  min-height: 145px;
-
+  min-height: 118px;
   display: flex;
-
   flex-direction: column;
-
-  justify-content: space-between;
-
-  padding:
-    19px
-    20px;
-
-  background:
-    var(--bg-surface);
-
-  border:
-    1px solid var(--border-color);
-
-  border-radius: 10px;
-
-  overflow: hidden;
-
-  box-shadow: none;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+  justify-content: center;
+  gap: 2px;
+  padding: 20px 22px;
+  border: 1px solid var(--line, #d9d1bf);
+  border-top: 3px solid var(--ink, #232019);
+  background: var(--card, #fbf8f1);
 }
-
-
-/* =====================================================
-   REMOVE BLUE LINES / DECORATIONS
-===================================================== */
-
-.stat-card::before,
-.stat-card::after {
-  display: none;
-
-  content: none;
-}
-
-
-/* =====================================================
-   STAT CARD HOVER
-===================================================== */
-
-.stat-card:hover {
-  background:
-    #f7f9fa;
-
-  border-color:
-    var(--border-color-hover);
-
-  transform:
-    translateY(-1px);
-
-  box-shadow: none;
-}
-
-
-/* =====================================================
-   STAT HEADER
-===================================================== */
-
-.stat-card-header {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 12px;
-
-  margin-bottom: 15px;
-}
-
-
-/* =====================================================
-   STAT LABEL
-===================================================== */
 
 .stat-label {
-  margin: 0;
-
-  color:
-    var(--text-muted);
-
-  font-size: 10px;
-
-  font-weight: 650;
-
-  letter-spacing: 0.55px;
-
+  margin: 0 0 6px;
+  color: var(--ink-soft, #565045);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-
-  line-height: 1.4;
 }
-
-
-/* =====================================================
-   STAT ICON
-===================================================== */
-
-.stat-icon {
-  width: 34px;
-
-  height: 34px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 8px;
-
-  background:
-    var(--color-accent-light);
-
-  border:
-    1px solid var(--color-accent-border);
-
-  color:
-    var(--color-accent);
-
-  font-size: 14px;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
-}
-
-
-.stat-card:hover .stat-icon {
-  background:
-    #e5f0f5;
-
-  border-color:
-    #c6dbe4;
-}
-
-
-/* =====================================================
-   STAT NUMBER
-===================================================== */
 
 .stat-card h3 {
   margin: 0;
-
-  color:
-    var(--text-primary);
-
-  font-size: 29px;
-
+  color: var(--ink, #232019);
+  font-family: var(--font-display, Fraunces, Georgia, serif);
+  font-size: 38px;
   font-weight: 700;
-
   line-height: 1;
-
-  letter-spacing: -0.6px;
+  letter-spacing: -0.02em;
 }
 
-
-/* =====================================================
-   STAT FOOTER
-===================================================== */
-
-.stat-footer {
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  margin-top: auto;
-
-  padding-top: 14px;
-
-  color:
-    var(--text-muted);
-
-  font-size: 10px;
-
-  font-weight: 500;
-}
-
-
-/* =====================================================
-   STAT BADGE
-===================================================== */
-
-.stat-badge {
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 4px;
-
-  min-height: 22px;
-
-  padding:
-    0 7px;
-
-  border-radius: 5px;
-
+.stat-positive,
+.stat-warning,
+.stat-danger {
+  margin-top: 6px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
   font-size: 9px;
-
-  font-weight: 700;
-
-  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
+.stat-positive {
+  color: var(--ok, #3c6b50);
+}
 
-/* =====================================================
-   POSITIVE
-===================================================== */
+.stat-warning {
+  color: var(--warn, #86601a);
+}
 
-.stat-badge.positive {
+.stat-danger {
+  color: var(--danger, #a53a2f);
+}
+
+.plagiarism-card {
+  border-top-color: var(--danger, #a53a2f);
   background:
-    var(--status-conform-bg);
-
-  border:
-    1px solid var(--status-conform-border);
-
-  color:
-    var(--status-conform-text);
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(165, 58, 47, 0.05) 23px 24px),
+    var(--card, #fbf8f1);
 }
 
-
-/* =====================================================
-   WARNING
-===================================================== */
-
-.stat-badge.warning {
-  background:
-    var(--status-review-bg);
-
-  border:
-    1px solid var(--status-review-border);
-
-  color:
-    var(--status-review-text);
-}
-
-
-/* =====================================================
-   DANGER
-===================================================== */
-
-.stat-badge.danger {
-  background:
-    var(--status-plagiat-bg);
-
-  border:
-    1px solid var(--status-plagiat-border);
-
-  color:
-    var(--status-plagiat-text);
-}
-
-
-/* =====================================================
-   STAT DESCRIPTION
-===================================================== */
-
-.stat-description {
-  color:
-    var(--text-subtle);
-
-  font-size: 9px;
-
-  line-height: 1.4;
-}
-
-
-/* =====================================================
-   CHART CARD
-===================================================== */
-
+/* ============ GRAPHIQUE ============ */
 .chart-card {
-  min-height: 345px;
-
-  padding: 24px;
-
-  margin-bottom: 22px;
-
-  background:
-    var(--bg-surface);
-
-  border:
-    1px solid var(--border-color);
-
-  border-radius: 10px;
-
+  margin-bottom: 26px;
+  border: 1px solid var(--ink, #232019);
+  border-radius: 0;
+  background: var(--card, #fbf8f1);
   box-shadow: none;
 }
-
-
-/* =====================================================
-   CHART HEADER
-===================================================== */
 
 .chart-header {
   display: flex;
-
-  align-items: flex-start;
-
+  align-items: center;
   justify-content: space-between;
-
-  gap: 20px;
-
-  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line, #d9d1bf);
 }
-
 
 .chart-header h2 {
-  margin:
-    0
-    0
-    6px;
-
-  color:
-    var(--text-primary);
-
-  font-size: 15px;
-
-  font-weight: 700;
-
-  line-height: 1.4;
+  margin: 0 0 4px;
+  color: var(--ink, #232019);
+  font-family: var(--font-display, Fraunces, Georgia, serif);
+  font-size: 20px;
+  font-weight: 600;
 }
-
 
 .chart-header p {
   margin: 0;
-
-  color:
-    var(--text-subtle);
-
-  font-size: 10px;
-
-  font-weight: 400;
+  color: var(--ink-soft, #565045);
+  font-size: 12px;
 }
-
-
-/* =====================================================
-   CHART LEGEND
-===================================================== */
 
 .chart-legend {
   display: flex;
-
   align-items: center;
-
-  gap: 8px;
+  gap: 16px;
 }
-
 
 .chart-legend span {
   display: inline-flex;
-
   align-items: center;
-
-  height: 27px;
-
-  padding:
-    0 9px;
-
-  border:
-    1px solid var(--border-color);
-
-  border-radius: 6px;
-
-  background:
-    var(--bg-soft);
-
-  color:
-    var(--text-muted);
-
+  gap: 6px;
+  color: var(--ink-soft, #565045);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
   font-size: 9px;
-
-  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-
-.legend-conforme {
-  color:
-    var(--status-conform-text);
-
-  border-color:
-    var(--status-conform-border);
+.chart-legend span::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border: 1px solid var(--ink, #232019);
 }
 
-
-.legend-revision {
-  color:
-    var(--status-review-text);
-
-  border-color:
-    var(--status-review-border);
+.legend-conforme::before {
+  background: var(--ok, #3c6b50);
 }
 
-
-.legend-plagiat {
-  color:
-    var(--status-plagiat-text);
-
-  border-color:
-    var(--status-plagiat-border);
+.legend-revision::before {
+  background: var(--warn, #86601a);
 }
 
+.legend-plagiat::before {
+  background: var(--danger, #a53a2f);
+}
 
-/* =====================================================
-   CHART
-===================================================== */
-
+/* ============ GRILLE DU GRAPHIQUE ============ */
 .chart {
-  height: 225px;
-
   display: flex;
+  padding: 24px 24px 18px;
 }
-
 
 .chart-y-axis {
-  width: 35px;
-
   display: flex;
-
   flex-direction: column;
-
   justify-content: space-between;
-
-  padding-bottom: 26px;
-
-  color:
-    var(--text-subtle);
-
-  font-size: 8px;
-
-  font-weight: 500;
+  align-items: flex-end;
+  padding-right: 10px;
+  color: var(--ink-faint, #8d8472);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 9px;
+  height: 180px;
+  flex-shrink: 0;
 }
-
 
 .chart-area {
   position: relative;
-
   flex: 1;
-
-  height: 200px;
-
-  border-bottom:
-    1px solid var(--border-color);
+  height: 180px;
+  border-bottom: 1px solid var(--ink, #232019);
 }
-
-
-/* =====================================================
-   GRID LINES
-===================================================== */
 
 .grid-line {
   position: absolute;
-
   left: 0;
-
   right: 0;
-
-  border-top:
-    1px solid var(--border-color-soft);
+  border-top: 1px dotted var(--line-strong, #b6ab94);
 }
 
-
-.line-120 {
-  top: 0;
-}
-
-
-.line-90 {
-  top: 25%;
-}
-
-
-.line-60 {
-  top: 50%;
-}
-
-
-.line-30 {
-  top: 75%;
-}
-
-
-.line-0 {
-  bottom: 0;
-}
-
-
-/* =====================================================
-   BARS
-===================================================== */
+.line-120 { top: 0; }
+.line-90 { top: 45px; }
+.line-60 { top: 90px; }
+.line-30 { top: 135px; }
+.line-0 { top: 180px; }
 
 .bars-container {
   position: absolute;
-
-  left: 20px;
-
-  right: 20px;
-
-  bottom: 0;
-
-  height: 200px;
-
+  inset: 0;
   display: flex;
-
   align-items: flex-end;
-
   justify-content: space-around;
+  gap: 8px;
 }
-
 
 .month-column {
+  flex: 1;
   height: 100%;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   justify-content: flex-end;
+  gap: 6px;
 }
-
 
 .bars {
-  height: 175px;
-
   display: flex;
-
   align-items: flex-end;
-
-  gap: 4px;
+  gap: 3px;
+  height: 100%;
 }
-
 
 .bar {
-  width: 13px;
-
-  min-height: 3px;
-
-  border-radius:
-    3px
-    3px
-    0
-    0;
-
-  background:
-    var(--color-accent);
-
-  opacity: 0.72;
-
-  transition:
-    opacity 0.2s ease;
+  width: 10px;
+  border: 1px solid var(--ink, #232019);
+  transition: height 0.4s ease;
+  position: relative;
 }
-
-
-.bar:hover {
-  opacity: 0.9;
-}
-
 
 .bar.conforme {
-  background:
-    var(--status-conform-text);
+  background: var(--ok, #3c6b50);
 }
-
 
 .bar.revision {
-  background:
-    var(--status-review-text);
+  background: var(--warn, #86601a);
 }
-
 
 .bar.plagiat {
-  background:
-    var(--status-plagiat-text);
+  background: var(--danger, #a53a2f);
 }
-
 
 .month-name {
-  margin-top: 8px;
-
-  color:
-    var(--text-subtle);
-
+  color: var(--ink-soft, #565045);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
   font-size: 9px;
-
-  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
 }
 
-
-/* =====================================================
-   BOTTOM SECTION
-===================================================== */
-
+/* ============ BAS DE PAGE ============ */
 .bottom-section {
   display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr)
-    210px;
-
-  gap: 16px;
-
-  margin-top: 22px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 22px;
 }
 
-
-/* =====================================================
-   RECENT DOCUMENTS
-===================================================== */
-
+/* ============ DOCUMENTS RÉCENTS ============ */
 .recent-documents-card {
-  min-height: 260px;
-
-  min-width: 0;
-
-  padding: 23px;
-
-  background:
-    var(--bg-surface);
-
-  border:
-    1px solid var(--border-color);
-
-  border-radius: 10px;
-
-  overflow-x: auto;
-
-  overflow-y: hidden;
-
-  box-shadow: none;
+  border: 1px solid var(--ink, #232019);
+  border-top: 3px double var(--ink, #232019);
+  background: var(--card, #fbf8f1);
+  overflow: hidden;
 }
-
-
-/* =====================================================
-   RECENT DOCUMENT HEADER
-===================================================== */
 
 .recent-documents-header {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
-  gap: 15px;
-
-  margin-bottom: 18px;
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line, #d9d1bf);
 }
-
 
 .recent-documents-header h2 {
   margin: 0;
-
-  color:
-    var(--text-primary);
-
-  font-size: 15px;
-
-  font-weight: 700;
+  color: var(--ink, #232019);
+  font-family: var(--font-display, Fraunces, Georgia, serif);
+  font-size: 19px;
+  font-weight: 600;
 }
-
-
-/* =====================================================
-   VIEW ALL BUTTON
-===================================================== */
 
 .view-all-btn {
-  width: 82px;
-
-  height: 32px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 0;
-
-  border:
-    1px solid var(--border-color);
-
-  border-radius: 6px;
-
-  background:
-    var(--bg-soft);
-
-  color:
-    var(--text-secondary);
-
-  font-size: 10px;
-
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong, #b6ab94);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink-soft, #565045);
+  font-family: var(--font-body, "Source Sans 3", Arial, sans-serif);
+  font-size: 11px;
   font-weight: 600;
-
   cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
+  transition: border-color 0.18s ease, color 0.18s ease;
 }
-
 
 .view-all-btn:hover {
-  background:
-    var(--bg-surface-hover);
-
-  border-color:
-    var(--border-color-hover);
-
-  color:
-    var(--color-accent);
+  border-color: var(--accent, #b23a2c);
+  color: var(--accent, #b23a2c);
 }
-
-
-.view-all-btn:active {
-  transform:
-    scale(0.98);
-}
-
-
-/* =====================================================
-   DOCUMENT TABLE
-===================================================== */
 
 .documents-table {
   width: 100%;
-
-  min-width: 480px;
 }
-
-
-/* =====================================================
-   TABLE ROW
-===================================================== */
 
 .table-row {
-  min-height: 44px;
-
   display: grid;
-
-  grid-template-columns:
-    2fr
-    0.6fr
-    1.2fr
-    1.1fr;
-
+  grid-template-columns: minmax(150px, 1.6fr) 0.5fr 0.7fr 0.7fr;
+  gap: 12px;
   align-items: center;
-
-  column-gap: 15px;
-
-  border-bottom:
-    1px solid var(--border-color-soft);
-
-  color:
-    var(--text-secondary);
-
-  font-size: 11px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--line, #d9d1bf);
 }
-
 
 .table-row:last-child {
   border-bottom: none;
 }
 
-
-.table-row:not(.table-header):hover {
-  background:
-    var(--bg-soft);
-}
-
-
-.table-row strong {
-  color:
-    var(--text-primary);
-
-  font-size: 11px;
-
-  font-weight: 600;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-}
-
-
-/* =====================================================
-   TABLE HEADER
-===================================================== */
-
 .table-header {
-  min-height: 32px;
-
-  color:
-    var(--text-subtle);
-
+  background: var(--paper-2, #ece6d8);
+  color: var(--ink-soft, #565045);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
   font-size: 9px;
-
-  font-weight: 700;
-
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-
-.table-header span {
-  color:
-    var(--text-subtle);
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-.status {
-  min-width: 76px;
-
-  width: fit-content;
-
-  height: 26px;
-
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding:
-    0 10px;
-
-  border-radius: 6px;
-
-  font-size: 9px;
-
+.table-row strong {
+  overflow: hidden;
+  color: var(--ink, #232019);
+  font-size: 13px;
   font-weight: 600;
-
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.table-row > span {
+  color: var(--ink-soft, #565045);
+  font-size: 12px;
+}
+
+/* ============ STATUT ============ */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid;
+  border-radius: 2px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
 
 .status.conform {
-  background:
-    var(--status-conform-bg);
-
-  border:
-    1px solid var(--status-conform-border);
-
-  color:
-    var(--status-conform-text);
+  color: var(--ok, #3c6b50);
+  border-color: var(--ok-line, #c6d7c7);
+  background: var(--ok-bg, #e9f0e7);
 }
-
 
 .status.review {
-  background:
-    var(--status-review-bg);
-
-  border:
-    1px solid var(--status-review-border);
-
-  color:
-    var(--status-review-text);
+  color: var(--warn, #86601a);
+  border-color: var(--warn-line, #dfd0a8);
+  background: var(--warn-bg, #f4ecdc);
 }
 
-
-.status.plagiarism {
-  background:
-    var(--status-plagiat-bg);
-
-  border:
-    1px solid var(--status-plagiat-border);
-
-  color:
-    var(--status-plagiat-text);
-}
-
-
-/* =====================================================
-   SECURITY CARD
-===================================================== */
-
+/* ============ SÉCURITÉ ============ */
 .security-card {
-  min-height: 90px;
-
-  align-self: end;
-
-  padding: 18px;
-
+  align-self: start;
+  padding: 24px 22px;
+  border: 1px solid var(--ink, #232019);
+  border-top: 3px double var(--ink, #232019);
   background:
-    var(--bg-surface);
-
-  border:
-    1px solid var(--border-color);
-
-  border-radius: 10px;
-
-  color:
-    var(--text-primary);
-
-  box-shadow: none;
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(35, 32, 25, 0.045) 23px 24px),
+    var(--card, #fbf8f1);
 }
-
-
-/* =====================================================
-   SECURITY ICON
-===================================================== */
 
 .security-icon {
-  width: 30px;
-
-  height: 30px;
-
+  width: 40px;
+  height: 40px;
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
-  margin-bottom: 10px;
-
-  border:
-    1px solid var(--color-accent-border);
-
-  border-radius: 7px;
-
-  background:
-    var(--color-accent-light);
-
-  color:
-    var(--color-accent);
-
-  font-size: 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--ok, #3c6b50);
+  background: var(--ok-bg, #e9f0e7);
+  color: var(--ok, #3c6b50);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 18px;
+  font-weight: 600;
 }
-
-
-/* =====================================================
-   SECURITY TITLE
-===================================================== */
 
 .security-card h3 {
-  margin:
-    0
-    0
-    6px;
-
-  color:
-    var(--text-primary);
-
-  font-size: 12px;
-
-  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--ink, #232019);
+  font-family: var(--font-display, Fraunces, Georgia, serif);
+  font-size: 19px;
+  font-weight: 600;
 }
-
-
-/* =====================================================
-   SECURITY DESCRIPTION
-===================================================== */
 
 .security-card p {
   margin: 0;
-
-  color:
-    var(--text-subtle);
-
-  font-size: 9px;
-
+  color: var(--ink-soft, #565045);
+  font-size: 12.5px;
   line-height: 1.6;
 }
 
-
-/* =====================================================
-   TEXT UTILITIES
-===================================================== */
-
-.text-primary {
-  color:
-    var(--text-primary);
-}
-
-
-.text-secondary {
-  color:
-    var(--text-secondary);
-}
-
-
-.text-muted {
-  color:
-    var(--text-muted);
-}
-
-
-.text-subtle {
-  color:
-    var(--text-subtle);
-}
-
-
-/* =====================================================
-   FOCUS
-===================================================== */
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-  outline:
-    2px solid #9fc6d6;
-
-  outline-offset:
-    2px;
-}
-
-
-/* =====================================================
-   SCROLLBAR
-===================================================== */
-
-.dashboard-content::-webkit-scrollbar,
-.recent-documents-card::-webkit-scrollbar {
-  width: 6px;
-
-  height: 6px;
-}
-
-
-.dashboard-content::-webkit-scrollbar-track,
-.recent-documents-card::-webkit-scrollbar-track {
-  background:
-    var(--bg-main);
-}
-
-
-.dashboard-content::-webkit-scrollbar-thumb,
-.recent-documents-card::-webkit-scrollbar-thumb {
-  background:
-    #ccd3d9;
-
-  border-radius:
-    10px;
-}
-
-
-.dashboard-content::-webkit-scrollbar-thumb:hover,
-.recent-documents-card::-webkit-scrollbar-thumb:hover {
-  background:
-    #b8c1c8;
-}
-
-
-/* =====================================================
-   RESPONSIVE - 1100px
-===================================================== */
-
-@media (max-width: 1100px) {
-
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1200px) {
   .statistics-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
 }
 
-
-/* =====================================================
-   RESPONSIVE - 900px
-===================================================== */
+@media (max-width: 1000px) {
+  .dashboard-body {
+    padding: 26px 24px 44px;
+  }
+  .bottom-section {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 900px) {
-
   .bottom-section {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
-
-  .security-card {
-    align-self: auto;
-  }
-
 }
 
-
-/* =====================================================
-   RESPONSIVE - 800px
-===================================================== */
-
 @media (max-width: 800px) {
-
-  :root {
-    --sidebar-width: 0px;
-  }
-
   .dashboard-content {
     margin-left: 0;
   }
-
   .dashboard-body {
-    padding:
-      0
-      20px
-      30px;
+    width: 100%;
+    padding: 24px 18px 40px;
   }
-
-  .chart-header {
-    flex-direction: column;
-
-    gap: 14px;
+  .welcome-card h1 {
+    font-size: 26px;
   }
-
+  .chart {
+    padding: 18px 14px 14px;
+  }
 }
-
-
-/* =====================================================
-   RESPONSIVE - 650px
-===================================================== */
-
-@media (max-width: 650px) {
-
-  .documents-table {
-    min-width: 550px;
-  }
-
-}
-
-
-/* =====================================================
-   RESPONSIVE - 600px
-===================================================== */
 
 @media (max-width: 600px) {
-
   .statistics-grid {
-    grid-template-columns:
-      1fr;
-
-    gap: 12px;
+    grid-template-columns: 1fr;
   }
-
-  .dashboard-body {
-    padding:
-      0
-      15px
-      25px;
+  .chart-header {
+    padding: 16px 18px;
   }
-
-  .welcome-card {
-    min-height: 105px;
-
-    padding:
-      20px;
-
-    justify-content: center;
-
-    text-align: center;
-  }
-
-  .welcome-card > div {
-    align-items: center;
-
-    justify-content: center;
-  }
-
-  .welcome-card h1 {
-    font-size: 20px;
-
-    text-align: center;
-  }
-
-  .welcome-card p {
-    font-size: 10px;
-
-    text-align: center;
-  }
-
-  .chart-card {
-    padding: 18px;
-
-    overflow-x: auto;
-  }
-
-  .chart {
-    min-width: 550px;
-  }
-
-  .stat-card {
-    min-height: 135px;
-
-    padding: 18px;
-  }
-
-  .stat-card h3 {
-    font-size: 27px;
-  }
-
-}
-
-
-/* =====================================================
-   RESPONSIVE - 450px
-===================================================== */
-
-@media (max-width: 450px) {
-
-  .dashboard-body {
-    padding:
-      0
-      12px
-      22px;
-  }
-
-  .welcome-card {
-    padding:
-      18px;
-
-    justify-content: center;
-
-    text-align: center;
-  }
-
-  .welcome-card > div {
-    align-items: center;
-
-    justify-content: center;
-  }
-
-  .welcome-card h1 {
-    font-size: 18px;
-
-    text-align: center;
-  }
-
-  .welcome-card p {
-    font-size: 10px;
-
-    text-align: center;
-  }
-
-  .stat-card {
-    min-height: 125px;
-
-    padding: 17px;
-  }
-
-  .stat-card h3 {
-    font-size: 25px;
-  }
-
-  .stat-icon {
-    width: 32px;
-
-    height: 32px;
-
-    font-size: 13px;
-  }
-
   .chart-legend {
     flex-wrap: wrap;
+    gap: 10px 14px;
   }
-
-  .recent-documents-card {
-    padding: 18px;
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 12px 16px;
   }
-
+  .table-header {
+    display: none;
+  }
 }
 
-
-/* =====================================================
-   REDUCE MOTION
-===================================================== */
-
 @media (prefers-reduced-motion: reduce) {
-
-  .dashboard-title span {
-    animation: none;
-
-    opacity: 1;
-
-    transform: none;
-  }
-
-  .stat-card,
-  .stat-icon,
-  .view-all-btn,
-  .bar,
-  .dashboard-content {
+  .bar {
     transition: none;
   }
+}
 
+/* ============ ÉDITION DU SOIR (tableau de bord) ============ */
+.dashboard-layout.dark-mode {
+  --paper: #201d17;
+  --paper-2: #262219;
+  --card: #262219;
+  --card-2: #2f2a20;
+  --ink: #e9e1d0;
+  --ink-soft: #a89e8b;
+  --ink-faint: #7d7562;
+  --line: #3c372c;
+  --line-strong: #57503f;
+  --line-ink: #e9e1d0;
+  --accent: #d87b68;
+  --accent-ink: #e69a8a;
+  --accent-soft: #3a2b26;
+  --ok: #7fb490;
+  --ok-bg: #24352b;
+  --ok-line: #35503f;
+  --warn: #c9a24a;
+  --warn-bg: #3a3320;
+  --warn-line: #56492a;
+  --danger: #e08a7c;
+  --danger-bg: #422a24;
+  --danger-line: #5a342c;
+
+  background: var(--paper, #201d17);
+  color: var(--ink, #e9e1d0);
+}
+
+.dashboard-layout.dark-mode .dashboard-content,
+.dashboard-layout.dark-mode .dashboard-body {
+  background: var(--paper, #201d17);
+}
+
+.dashboard-layout.dark-mode .welcome-card,
+.dashboard-layout.dark-mode .security-card {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(233, 225, 208, 0.05) 23px 24px),
+    var(--card, #262219);
+}
+
+.dashboard-layout.dark-mode .plagiarism-card {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(224, 138, 124, 0.06) 23px 24px),
+    var(--card, #262219);
+}
+
+.dashboard-layout.dark-mode .chart-card,
+.dashboard-layout.dark-mode .recent-documents-card,
+.dashboard-layout.dark-mode .security-card {
+  box-shadow: none;
+}
+
+.dashboard-layout.dark-mode .table-header {
+  background: var(--card-2, #2f2a20);
+}
+
+.dashboard-layout.dark-mode .view-all-btn:hover {
+  border-color: var(--accent, #d87b68);
+  color: var(--accent, #d87b68);
+}
+
+.dashboard-layout.dark-mode .dashboard-theme-btn:hover {
+  border-color: var(--ink, #e9e1d0);
+  color: var(--ink, #e9e1d0);
+}
+
+.dashboard-layout.dark-mode .sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.06);
 }

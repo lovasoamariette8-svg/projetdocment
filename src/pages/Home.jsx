@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Home.css'
@@ -6,46 +5,39 @@ import './Home.css'
 function Home() {
   const navigate = useNavigate()
 
-  // Dark mode par défaut
-  const [darkMode, setDarkMode] = useState(true)
+  // Édition claire par défaut ; encre sur papier le soir
+  const [darkMode, setDarkMode] = useState(false)
+
+  const edition = 'Paris, septembre 2026 — N° 03'
 
   return (
     <div className={`home-page ${darkMode ? 'dark-mode' : 'light-mode'}`}>
 
       {/* =====================================================
-          HEADER
+          MANCHETTE
       ===================================================== */}
       <header className="home-header">
 
-        {/* LOGO */}
-        <div className="home-logo">
-          <div className="home-logo-box">
-            TS
-          </div>
-
-          <div className="logo-text">
-            <span>TextSim</span>
-            <small>Analyse de texte</small>
-          </div>
+        <div className="masthead-top">
+          <span>Spécial analyse documentaire</span>
+          <span className="masthead-ornament">✦</span>
+          <span>{edition}</span>
         </div>
 
+        <h1 className="masthead-logo">
+          TextSim
+        </h1>
 
-        {/* NAVIGATION */}
+        <div className="masthead-bottom">
+          <span>Comparer — Détecter — Publier</span>
+        </div>
+
         <nav className="home-nav">
 
-          <a href="#features">
-            Fonctionnalités
-          </a>
+          <a href="#features">Nos rubriques</a>
+          <a href="#how-it-works">Le principe</a>
+          <a href="#about">Le bureau</a>
 
-          <a href="#how-it-works">
-            Comment ça marche
-          </a>
-
-          <a href="#about">
-            À propos
-          </a>
-
-          {/* THEME */}
           <button
             type="button"
             className="theme-btn"
@@ -54,21 +46,16 @@ function Home() {
             <span className="material-symbols-outlined">
               {darkMode ? 'light_mode' : 'dark_mode'}
             </span>
-
-            {darkMode ? 'Light' : 'Dark'}
+            {darkMode ? 'Édition claire' : 'Édition du soir'}
           </button>
 
-
-          {/* LOGIN */}
           <button
             type="button"
             className="admin-btn"
             onClick={() => navigate('/login')}
           >
             Connexion
-            <span className="material-symbols-outlined">
-              arrow_forward
-            </span>
+            <span className="material-symbols-outlined">arrow_forward</span>
           </button>
 
         </nav>
@@ -77,499 +64,286 @@ function Home() {
 
 
       {/* =====================================================
-          HERO
+          À LA UNE
       ===================================================== */}
-      <main className="home-hero">
+      <main className="home-main">
 
-        {/* BADGE */}
-        <div className="hero-badge">
+        <section className="lead">
 
-          <span className="badge-dot"></span>
+          <p className="lead-kicker">À la une</p>
 
-          Plateforme intelligente de détection
+          <h2 className="lead-title">
+            L'analyse des textes,
+            <br />
+            mise à nu.
+          </h2>
 
-        </div>
+          <p className="lead-byline">
+            Rédaction TextSim — rubrique documents
+          </p>
 
+          <p className="lead-text">
+            Trois formats : TXT, DOCX, PDF. Un moteur fondé sur les n-grammes. Une
+            méthode qui compare vos documents entre eux, mesure les similitudes
+            terme à terme et signale, sans détour, les passages copiés.
+          </p>
 
-        {/* TITLE */}
-        <h1>
+          <div className="lead-actions">
 
-          <span className="title-white">
-            Analysez vos documents,
-          </span>
+            <button
+              type="button"
+              className="primary-btn"
+              onClick={() => navigate('/login')}
+            >
+              Commencer l'analyse
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
 
-          <span className="title-blue">
-            détectez les similitudes.
-          </span>
+            <a
+              href="#how-it-works"
+              className="secondary-btn"
+            >
+              Lire le principe
+            </a>
 
-        </h1>
-
-
-        {/* DESCRIPTION */}
-        <p className="hero-description">
-
-          TextSim vous permet de comparer vos documents,
-          d'identifier les similitudes textuelles et
-          d'obtenir des résultats précis en quelques clics.
-
-        </p>
-
-
-        {/* BUTTONS */}
-        <div className="hero-buttons">
-
-          <button
-            type="button"
-            className="primary-btn"
-            onClick={() => navigate('/login')}
-          >
-
-            Commencer l'analyse
-
-            <span className="material-symbols-outlined">
-              arrow_forward
-            </span>
-
-          </button>
-
-
-          <a
-            href="#how-it-works"
-            className="secondary-btn"
-          >
-
-            <span className="material-symbols-outlined">
-              play_circle
-            </span>
-
-            Découvrir
-
-          </a>
-
-        </div>
-
-
-        {/* HERO STATS */}
-        <div className="hero-stats">
-
-          <div className="hero-stat">
-            <strong>TXT</strong>
-            <span>Format supporté</span>
           </div>
 
-          <div className="hero-stat">
-            <strong>DOCX</strong>
-            <span>Format supporté</span>
+        </section>
+
+
+        {/* RELEVÉS */}
+        <aside className="lead-facts" aria-label="Chiffres clés">
+
+          <p className="facts-title">Le relevé</p>
+
+          <div className="fact">
+            <strong>3+</strong>
+            <span>Formats analysés</span>
           </div>
 
-          <div className="hero-stat">
-            <strong>PDF</strong>
-            <span>Format supporté</span>
+          <div className="fact">
+            <strong>N-gram</strong>
+            <span>Moteur de détection</span>
           </div>
 
-          <div className="hero-stat">
+          <div className="fact">
             <strong>100%</strong>
             <span>Analyse automatisée</span>
           </div>
 
-        </div>
+          <div className="fact">
+            <strong>0</strong>
+            <span>Donnée hors de vos mains</span>
+          </div>
+
+        </aside>
+
+
+        {/* =====================================================
+            NOS RUBRIQUES
+        ===================================================== */}
+        <section id="features" className="features-section">
+
+          <div className="section-heading">
+
+            <span className="heading-kicker">Nos rubriques</span>
+
+            <h2>
+              Six métiers du texte
+            </h2>
+
+            <p>
+              Ce que le journal sait faire : importer, comparer, mesurer,
+              régler, détailler, conserver.
+            </p>
+
+          </div>
+
+          <div className="features-grid">
+
+            <article className="feature-card">
+              <span className="feature-num">01</span>
+              <div className="feature-content">
+                <h3>Importation de documents</h3>
+                <p>
+                  TXT, DOCX et PDF sont recueillis et préparés
+                  pour la comparaison.
+                </p>
+              </div>
+            </article>
+
+            <article className="feature-card">
+              <span className="feature-num">02</span>
+              <div className="feature-content">
+                <h3>Analyse intelligente</h3>
+                <p>
+                  Le contenu est comparé automatiquement,
+                  les similitudes relevées.
+                </p>
+              </div>
+            </article>
+
+            <article className="feature-card">
+              <span className="feature-num">03</span>
+              <div className="feature-content">
+                <h3>Score de similarité</h3>
+                <p>
+                  Un pourcentage clair, sans jargon ni
+                  fioritures.
+                </p>
+              </div>
+            </article>
+
+            <article className="feature-card">
+              <span className="feature-num">04</span>
+              <div className="feature-content">
+                <h3>Paramètres personnalisables</h3>
+                <p>
+                  Seuil d'alerte, taille des n-grammes :
+                  la rédaction règle sa ligne.
+                </p>
+              </div>
+            </article>
+
+            <article className="feature-card">
+              <span className="feature-num">05</span>
+              <div className="feature-content">
+                <h3>Résultats détaillés</h3>
+                <p>
+                  Statistiques et passages relevés,
+                  présentés en toute transparence.
+                </p>
+              </div>
+            </article>
+
+            <article className="feature-card">
+              <span className="feature-num">06</span>
+              <div className="feature-content">
+                <h3>Historique des analyses</h3>
+                <p>
+                  Chaque édition est archivée, consultable
+                  à tout moment.
+                </p>
+              </div>
+            </article>
+
+          </div>
+
+        </section>
+
+
+        {/* =====================================================
+            LE PRINCIPE
+        ===================================================== */}
+        <section id="how-it-works" className="how-section">
+
+          <div className="section-heading">
+
+            <span className="heading-kicker">Le principe</span>
+
+            <h2>
+              Trois étapes, comme un bon article
+            </h2>
+
+            <p>
+              Recueillir, confronter, publier le bilan.
+            </p>
+
+          </div>
+
+          <div className="steps-container">
+
+            <article className="step-card">
+              <span className="step-number">01</span>
+              <h3>Importer</h3>
+              <p>
+                Sélectionnez les documents à
+                confronter.
+              </p>
+            </article>
+
+            <article className="step-card">
+              <span className="step-number">02</span>
+              <h3>Analyser</h3>
+              <p>
+                TextSim compare les textes et relève
+                les passages communs.
+              </p>
+            </article>
+
+            <article className="step-card">
+              <span className="step-number">03</span>
+              <h3>Consulter</h3>
+              <p>
+                Le score et le détail des similitudes
+                sont mis sous vos yeux.
+              </p>
+            </article>
+
+          </div>
+
+        </section>
+
+
+        {/* =====================================================
+            LE BUREAU / CTA
+        ===================================================== */}
+        <section id="about" className="cta-section">
+
+          <div className="cta-content">
+
+            <p className="cta-label">Le bureau vous attend</p>
+
+            <h2>
+              Prêt à publier votre analyse&nbsp;?
+            </h2>
+
+            <p className="cta-text">
+              Ouvrez un compte ou poursuivez une session existante.
+            </p>
+
+            <button
+              type="button"
+              className="cta-btn"
+              onClick={() => navigate('/login')}
+            >
+              Se connecter
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
+
+          </div>
+
+        </section>
 
       </main>
 
 
       {/* =====================================================
-          FEATURES
-      ===================================================== */}
-      <section
-        id="features"
-        className="features-section"
-      >
-
-        <div className="section-title">
-
-          <span>
-            FONCTIONNALITÉS
-          </span>
-
-          <h2>
-            Tout ce dont vous avez besoin
-          </h2>
-
-          <p>
-            Une plateforme conçue pour rendre l'analyse
-            de similarité simple, rapide et efficace.
-          </p>
-
-        </div>
-
-
-        <div className="features-grid">
-
-          {/* FEATURE 1 */}
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              <span className="material-symbols-outlined">
-                upload_file
-              </span>
-            </div>
-
-            <div className="feature-content">
-
-              <h3>
-                Importation de documents
-              </h3>
-
-              <p>
-                Importez facilement vos fichiers
-                TXT, DOCX et PDF pour les analyser.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {/* FEATURE 2 */}
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              <span className="material-symbols-outlined">
-                manage_search
-              </span>
-            </div>
-
-            <div className="feature-content">
-
-              <h3>
-                Analyse intelligente
-              </h3>
-
-              <p>
-                Comparez automatiquement le contenu
-                de vos documents et détectez les similitudes.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {/* FEATURE 3 */}
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              <span className="material-symbols-outlined">
-                percent
-              </span>
-            </div>
-
-            <div className="feature-content">
-
-              <h3>
-                Score de similarité
-              </h3>
-
-              <p>
-                Obtenez un pourcentage clair permettant
-                de mesurer le niveau de similarité.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {/* FEATURE 4 */}
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              <span className="material-symbols-outlined">
-                tune
-              </span>
-            </div>
-
-            <div className="feature-content">
-
-              <h3>
-                Paramètres personnalisables
-              </h3>
-
-              <p>
-                Configurez les paramètres d'analyse
-                selon vos besoins.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {/* FEATURE 5 */}
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              <span className="material-symbols-outlined">
-                analytics
-              </span>
-            </div>
-
-            <div className="feature-content">
-
-              <h3>
-                Résultats détaillés
-              </h3>
-
-              <p>
-                Visualisez les résultats avec des
-                statistiques faciles à comprendre.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {/* FEATURE 6 */}
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              <span className="material-symbols-outlined">
-                history
-              </span>
-            </div>
-
-            <div className="feature-content">
-
-              <h3>
-                Historique des analyses
-              </h3>
-
-              <p>
-                Retrouvez facilement vos analyses
-                précédentes et leurs résultats.
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      {/* =====================================================
-          HOW IT WORKS
-      ===================================================== */}
-      <section
-        id="how-it-works"
-        className="how-section"
-      >
-
-        <div className="section-title">
-
-          <span>
-            FONCTIONNEMENT
-          </span>
-
-          <h2>
-            Comment ça marche ?
-          </h2>
-
-          <p>
-            Trois étapes simples pour analyser
-            vos documents.
-          </p>
-
-        </div>
-
-
-        <div className="steps-container">
-
-          {/* STEP 1 */}
-          <div className="step-card">
-
-            <div className="step-number">
-              01
-            </div>
-
-            <span className="material-symbols-outlined step-icon">
-              upload_file
-            </span>
-
-            <h3>
-              Importer
-            </h3>
-
-            <p>
-              Sélectionnez les documents que
-              vous souhaitez comparer.
-            </p>
-
-          </div>
-
-
-          {/* STEP 2 */}
-          <div className="step-card">
-
-            <div className="step-number">
-              02
-            </div>
-
-            <span className="material-symbols-outlined step-icon">
-              manage_search
-            </span>
-
-            <h3>
-              Analyser
-            </h3>
-
-            <p>
-              Lancez l'analyse et laissez TextSim
-              comparer automatiquement les textes.
-            </p>
-
-          </div>
-
-
-          {/* STEP 3 */}
-          <div className="step-card">
-
-            <div className="step-number">
-              03
-            </div>
-
-            <span className="material-symbols-outlined step-icon">
-              analytics
-            </span>
-
-            <h3>
-              Consulter
-            </h3>
-
-            <p>
-              Consultez le score et les détails
-              des similitudes détectées.
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      {/* =====================================================
-          ABOUT / CTA
-      ===================================================== */}
-      <section
-        id="about"
-        className="cta-section"
-      >
-
-        <div className="cta-content">
-
-          <div className="cta-icon">
-            <span className="material-symbols-outlined">
-              compare_arrows
-            </span>
-          </div>
-
-          <div>
-
-            <span className="cta-label">
-              TEXTSIM
-            </span>
-
-            <h2>
-              Prêt à analyser vos documents ?
-            </h2>
-
-            <p>
-              Commencez dès maintenant votre analyse
-              de similarité textuelle.
-            </p>
-
-          </div>
-
-          <button
-            type="button"
-            className="cta-btn"
-            onClick={() => navigate('/login')}
-          >
-
-            Commencer
-
-            <span className="material-symbols-outlined">
-              arrow_forward
-            </span>
-
-          </button>
-
-        </div>
-
-      </section>
-
-
-      {/* =====================================================
-          FOOTER
+          COLOPHON
       ===================================================== */}
       <footer className="home-footer">
 
         <div className="footer-main">
 
-          {/* LOGO */}
           <div className="footer-brand">
-
-            <div className="footer-logo-box">
-              TS
-            </div>
-
-            <div>
-
-              <strong>
-                TextSim
-              </strong>
-
-              <p>
-                Détection de similarité textuelle
-              </p>
-
-            </div>
-
+            <strong>TextSim</strong>
+            <p>Feuille de comparaison textuelle — fondée en 2026</p>
           </div>
 
-
-          {/* FOOTER LINKS */}
           <div className="footer-links">
 
-            <a href="#features">
-              Fonctionnalités
-            </a>
-
-            <a href="#how-it-works">
-              Fonctionnement
-            </a>
-
-            <a href="#about">
-              À propos
-            </a>
+            <a href="#features">Nos rubriques</a>
+            <a href="#how-it-works">Le principe</a>
+            <a href="#about">Le bureau</a>
 
           </div>
 
         </div>
 
-
         <div className="footer-bottom">
 
-          <span>
-            © 2026 TextSim. Tous droits réservés.
-          </span>
-
-          <span>
-            Plateforme d'analyse textuelle
-          </span>
+          <span>© 2026 TextSim — Tous droits réservés.</span>
+          <span>Imprimé sur du papier sans faille.</span>
 
         </div>
 

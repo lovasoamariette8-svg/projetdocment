@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 
 
 class Folder(models.Model):
@@ -235,3 +236,66 @@ class AnalysisSettings(models.Model):
 
     def __str__(self):
         return f"Paramètres de {self.user.username}"
+
+
+class PasswordResetToken(models.Model):
+    """Code de récupération de mot de passe, envoyé par e-mail."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='password_reset_tokens',
+        verbose_name="Utilisateur",
+    )
+    code_hash = models.CharField(max_length=128, verbose_name="Code (empreinte SHA-256)")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    expires_at = models.DateTimeField(verbose_name="Expiration")
+    used = models.BooleanField(default=False, verbose_name="Utilisé ?")
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Code de récupération"
+        verbose_name_plural = "Codes de récupération"
+
+    def __str__(self):
+        return f"Code {self.user.username} ({self.created_at:%d/%m/%Y %H:%M})"
+
+    @property
+    def is_valid(self):
+        return not self.used and self.expires_at > timezone.now()
+
+    def matches(self, code):
+        import hashlib
+        import hmac
+        computed = hashlib.sha256(code.strip().upper().encode()).hexdigest()
+        return hmac.compare_digest(computed, self.code_hash)
+
+
+class PendingRegistration(models.Model):
+    """Inscription en attente de vérification par code e-mail."""
+
+    email = models.EmailField(verbose_name="E-mail")
+    username = models.CharField(max_length=150, verbose_name="Nom d'utilisateur")
+    password_hash = models.CharField(max_length=255, verbose_name="Mot de passe (empreinte)")
+    code_hash = models.CharField(max_length=128, verbose_name="Code (empreinte SHA-256)")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    expires_at = models.DateTimeField(verbose_name="Expiration")
+    used = models.BooleanField(default=False, verbose_name="Utilisé ?")
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Inscription en attente"
+        verbose_name_plural = "Inscriptions en attente"
+
+    def __str__(self):
+        return f"Inscription {self.username} ({self.email})"
+
+    @property
+    def is_valid(self):
+        return not self.used and self.expires_at > timezone.now()
+
+    def matches(self, code):
+        import hashlib
+        import hmac
+        computed = hashlib.sha256(code.strip().upper().encode()).hexdigest()
+        return hmac.compare_digest(computed, self.code_hash)

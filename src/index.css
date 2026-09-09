@@ -4,6 +4,48 @@
   box-sizing: border-box;
 }
 
+/* ------------------------------------------------------------------
+   CHARTE « PAPIER & PRESSE »
+   - Fond papier chaude, encre presque noire
+   - Serif pour les titres, sans pour le corps, mono pour les chiffres
+   - Filets typographiques au lieu des ombres et dégradés
+------------------------------------------------------------------ */
+
+:root {
+  --paper: #f4f0e7;
+  --paper-2: #ece6d8;
+  --card: #fbf8f1;
+  --card-2: #f5f1e6;
+
+  --ink: #232019;
+  --ink-soft: #565045;
+  --ink-faint: #8d8472;
+
+  --line: #d9d1bf;
+  --line-strong: #b6ab94;
+  --line-ink: #232019;
+
+  --accent: #b23a2c;
+  --accent-ink: #8f2c20;
+  --accent-soft: #f2e3df;
+
+  --ok: #3c6b50;
+  --ok-bg: #e9f0e7;
+  --ok-line: #c6d7c7;
+
+  --warn: #86601a;
+  --warn-bg: #f4ecdc;
+  --warn-line: #dfd0a8;
+
+  --danger: #a53a2f;
+  --danger-bg: #f5e4e0;
+  --danger-line: #e2c4bd;
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Source Sans 3", Arial, Helvetica, sans-serif;
+  --font-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+
 html,
 body,
 #root {
@@ -13,11 +55,8 @@ body,
 
 body {
   margin: 0;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
-  background: #171521;
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
 }

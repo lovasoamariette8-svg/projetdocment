@@ -5,6 +5,7 @@ import api, { getErrorMessage } from '../api'
 import './Dashboard.css'
 
 function Dashboard() {
+  const [darkMode, setDarkMode] = useState(false)
   const [stats, setStats] = useState({
     total_documents: 0,
     analysed: 0,
@@ -55,7 +56,7 @@ function Dashboard() {
   const recentDocs = stats.recent_documents || []
 
   return (
-    <div className="dashboard-layout">
+    <div className={`dashboard-layout ${darkMode ? 'dark-mode' : 'light-mode'}`}>
 
       {/* SIDEBAR */}
       <Sidebar />
@@ -67,6 +68,20 @@ function Dashboard() {
         <Header showTitle />
 
         <div className="dashboard-body">
+
+          {/* THÈME */}
+          <div className="dashboard-topbar">
+            <button
+              type="button"
+              className="dashboard-theme-btn"
+              onClick={() => setDarkMode(!darkMode)}
+            >
+              <span className="material-symbols-outlined">
+                {darkMode ? 'light_mode' : 'dark_mode'}
+              </span>
+              {darkMode ? 'Édition claire' : 'Édition du soir'}
+            </button>
+          </div>
 
           {/* WELCOM */}
           <section className="welcome-card">

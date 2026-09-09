@@ -1,8 +1,13 @@
+import hashlib
+import hmac
 import os
+import secrets
 from datetime import timedelta
 
 from django.contrib.auth import login
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db import transaction
 from django.http import FileResponse, HttpResponse
 from django.utils import timezone
@@ -23,7 +28,7 @@ class CsrfTokenView(APIView):
         from django.middleware.csrf import get_token
         return Response({'csrfToken': get_token(request)})
 
-from .models import Analysis, AnalysisSettings, Comparison, Document, Folder, MatchingPassage
+from .models import Analysis, AnalysisSettings, Comparison, Document, Folder, MatchingPassage, PasswordResetToken, PendingRegistration
 from .serializers import (
     AnalysisSerializer,
     AnalysisSettingsSerializer,
@@ -32,7 +37,12 @@ from .serializers import (
     DocumentUploadSerializer,
     FolderSerializer,
     LoginSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetVerifySerializer,
+    RegisterConfirmSerializer,
     RegisterSerializer,
+    RegisterVerifySerializer,
     StartAnalysisSerializer,
     UserSerializer,
 )
@@ -87,11 +97,279 @@ class RegisterView(APIView):
         )
 
 
+class RegisterVerifyView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegisterVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        email = data['email'].lower()
+
+        # Invalide les éventuelles demandes précédentes pour ce même e-mail
+        PendingRegistration.objects.filter(
+            email__iexact=email, used=False
+        ).update(used=True)
+
+        code = self._generate_code()
+        PendingRegistration.objects.create(
+            email=email,
+            username=data['username'],
+            password_hash=make_password(data['password']),
+            code_hash=hashlib.sha256(code.encode()).hexdigest(),
+            expires_at=timezone.now() + timedelta(minutes=15),
+        )
+
+        self._send_code_by_email(data['username'], email, code)
+
+        return Response({
+            'message': 'Un code de vérification a été envoyé à votre adresse e-mail.',
+        })
+
+    @staticmethod
+    def _generate_code():
+        alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+        return ''.join(secrets.choice(alphabet) for _ in range(6))
+
+    @staticmethod
+    def _send_code_by_email(username, email, code):
+        message_plain = (
+            f"Bonjour {username},\n\n"
+            f"Bienvenue sur TEXTSIM !\n\n"
+            f"Votre code de vérification pour finaliser votre inscription est : {code}\n\n"
+            f"Saisissez ce code sur la page d'inscription pour activer votre compte.\n\n"
+            f"Ce code est valable 15 minutes.\n\n"
+            f"— L'équipe TEXTSIM"
+        )
+        message_html = f"""
+        <p>Bonjour <strong>{username}</strong>,</p>
+        <p>Bienvenue sur TEXTSIM !</p>
+        <p>Votre code de vérification pour finaliser votre inscription est :</p>
+        <p style="font-size:32px; font-weight:bold; letter-spacing:8px; color:#2563eb;">
+            {code}
+        </p>
+        <p>Saisissez ce code sur la page d'inscription pour activer votre compte.</p>
+        <p>Ce code est valable <strong>15 minutes</strong>.</p>
+        <p>— L'équipe TEXTSIM</p>
+        """
+        send_mail(
+            subject='Vérification de votre inscription — TEXTSIM',
+            message=message_plain,
+            html_message=message_html,
+            from_email=None,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+
+class RegisterConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegisterConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email'].lower()
+        pending = (
+            PendingRegistration.objects.filter(
+                email__iexact=email, used=False, expires_at__gt=timezone.now()
+            )
+            .order_by('-created_at')
+            .first()
+        )
+        if not pending or not pending.matches(serializer.validated_data['code']):
+            return Response(
+                {'detail': 'Code de vérification invalide ou expiré.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User(
+            username=pending.username,
+            email=pending.email,
+        )
+        user.password = pending.password_hash
+        user.save()
+
+        pending.used = True
+        pending.save(update_fields=['used'])
+
+        AnalysisSettings.objects.get_or_create(user=user)
+
+        from django.contrib.auth import login
+        login(request, user)
+
+        return Response(
+            {
+                'user': UserSerializer(user).data,
+                'message': 'Compte créé avec succès.',
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
 class LogoutView(APIView):
     def post(self, request):
         from django.contrib.auth import logout
         logout(request)
         return Response({'message': 'Déconnexion réussie.'})
+
+
+class PasswordResetView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        identifier = serializer.validated_data['username']
+        user = (
+            User.objects.filter(username__iexact=identifier).first()
+            or User.objects.filter(email__iexact=identifier).first()
+        )
+        if not user:
+            return Response(
+                {'detail': 'Aucun compte ne correspond à ces informations.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not user.email:
+            return Response(
+                {'detail': "Aucune adresse e-mail n'est associée à ce compte."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Invalide les anciens codes encore valides
+        PasswordResetToken.objects.filter(
+            user=user, used=False, expires_at__gt=timezone.now()
+        ).update(used=True)
+
+        code = self._generate_code()
+        token = PasswordResetToken.objects.create(
+            user=user,
+            code_hash=hashlib.sha256(code.encode()).hexdigest(),
+            expires_at=timezone.now() + timedelta(minutes=15),
+        )
+
+        self._send_code_by_email(user, code)
+
+        return Response({'message': 'Un code de récupération a été envoyé à votre adresse e-mail.'})
+
+    @staticmethod
+    def _generate_code():
+        alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+        return ''.join(secrets.choice(alphabet) for _ in range(6))
+
+    @staticmethod
+    def _send_code_by_email(user, code):
+        message_plain = (
+            f"Bonjour {user.username},\n\n"
+            f"Vous avez demandé la réinitialisation de votre mot de passe.\n\n"
+            f"Votre code de récupération est : {code}\n\n"
+            f"Saisissez ce code sur la page « Mot de passe oublié » pour définir un nouveau mot de passe.\n\n"
+            f"Ce code est valable 15 minutes et ne peut être utilisé qu'une seule fois.\n\n"
+            f"Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.\n\n"
+            f"— L'équipe TEXTSIM"
+        )
+        message_html = f"""
+        <p>Bonjour <strong>{user.username}</strong>,</p>
+        <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+        <p>Votre code de récupération est :</p>
+        <p style="font-size:32px; font-weight:bold; letter-spacing:8px; color:#2563eb;">
+            {code}
+        </p>
+        <p>Saisissez ce code sur la page « Mot de passe oublié » pour définir un nouveau mot de passe.</p>
+        <p>Ce code est valable <strong>15 minutes</strong> et ne peut être utilisé qu'une seule fois.</p>
+        <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.</p>
+        <p>— L'équipe TEXTSIM</p>
+        """
+        send_mail(
+            subject='Récupération de mot de passe — TEXTSIM',
+            message=message_plain,
+            html_message=message_html,
+            from_email=None,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+
+class PasswordResetVerifyView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        identifier = serializer.validated_data['username']
+        user = (
+            User.objects.filter(username__iexact=identifier).first()
+            or User.objects.filter(email__iexact=identifier).first()
+        )
+        if not user:
+            return Response(
+                {'detail': 'Utilisateur introuvable.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        code = serializer.validated_data['code']
+        token = (
+            PasswordResetToken.objects.filter(
+                user=user, used=False, expires_at__gt=timezone.now()
+            )
+            .order_by('-created_at')
+            .first()
+        )
+        if not token or not token.matches(code):
+            return Response(
+                {'detail': 'Code de récupération invalide ou expiré.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response({
+            'username': user.username,
+            'email': user.email,
+            'message': 'Code validé avec succès.',
+        })
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        identifier = serializer.validated_data['username']
+        user = (
+            User.objects.filter(username__iexact=identifier).first()
+            or User.objects.filter(email__iexact=identifier).first()
+        )
+        if not user:
+            return Response(
+                {'detail': 'Utilisateur introuvable.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        code = serializer.validated_data['code']
+        token = (
+            PasswordResetToken.objects.filter(
+                user=user, used=False, expires_at__gt=timezone.now()
+            )
+            .order_by('-created_at')
+            .first()
+        )
+        if not token or not token.matches(code):
+            return Response(
+                {'detail': 'Code de récupération invalide ou expiré.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        token.used = True
+        token.save(update_fields=['used'])
+
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response({'message': 'Mot de passe réinitialisé avec succès.'})
 
 
 class MeView(APIView):

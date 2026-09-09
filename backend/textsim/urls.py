@@ -16,7 +16,12 @@ from .views import (
     LoginView,
     LogoutView,
     MeView,
+    PasswordResetConfirmView,
+    PasswordResetView,
+    PasswordResetVerifyView,
+    RegisterConfirmView,
     RegisterView,
+    RegisterVerifyView,
     SettingsView,
 )
 
@@ -25,7 +30,12 @@ urlpatterns = [
     path('auth/csrf/', CsrfTokenView.as_view(), name='auth-csrf'),
     path('auth/login/', LoginView.as_view(), name='auth-login'),
     path('auth/register/', RegisterView.as_view(), name='auth-register'),
+    path('auth/register/verify/', RegisterVerifyView.as_view(), name='auth-register-verify'),
+    path('auth/register/confirm/', RegisterConfirmView.as_view(), name='auth-register-confirm'),
     path('auth/logout/', LogoutView.as_view(), name='auth-logout'),
+    path('auth/password-reset/', PasswordResetView.as_view(), name='auth-password-reset'),
+    path('auth/password-reset/verify/', PasswordResetVerifyView.as_view(), name='auth-password-reset-verify'),
+    path('auth/password-reset/confirm/', PasswordResetConfirmView.as_view(), name='auth-password-reset-confirm'),
     path('auth/me/', MeView.as_view(), name='auth-me'),
 
     # Documents

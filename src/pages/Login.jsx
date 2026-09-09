@@ -8,7 +8,7 @@ function Login() {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [darkMode, setDarkMode] = useState(true)
+  const [darkMode, setDarkMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -30,36 +30,6 @@ function Login() {
       navigate('/dashboard')
     } catch (err) {
       setError(getErrorMessage(err, 'Erreur lors de la connexion.'))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const [email, setEmail] = useState('')
-  const [isRegisterMode, setIsRegisterMode] = useState(false)
-
-  // Inscription réelle via le backend
-  const handleRegister = async (e) => {
-    e.preventDefault()
-    setError('')
-
-    if (!username || !email || !password) {
-      alert('Veuillez remplir tous les champs pour vous inscrire.')
-      return
-    }
-
-    setLoading(true)
-    try {
-      await ensureCsrf()
-      await api.post('/auth/register/', {
-        username,
-        password,
-        email,
-      })
-      sessionStorage.setItem('isLoggedIn', 'true')
-      navigate('/dashboard')
-    } catch (err) {
-      setError(getErrorMessage(err, 'Erreur lors de l\'inscription.'))
     } finally {
       setLoading(false)
     }
@@ -93,9 +63,9 @@ function Login() {
         </div>
 
         {/* TITRE */}
-        <h1>Bienvenue</h1>
+        <h1>Bon retour</h1>
         <p className="login-subtitle">
-          Connectez-vous ou inscrivez-vous pour accéder à votre espace
+          Connectez-vous pour accéder à votre espace
         </p>
 
         {/* ERREUR */}
@@ -105,10 +75,10 @@ function Login() {
           </div>
         )}
 
-        {/* CARTE DE CONNEXION / INSCRIPTION */}
+        {/* CARTE DE CONNEXION */}
         <div className="login-card">
 
-          <form>
+          <form onSubmit={handleLogin}>
 
             {/* NOM D'UTILISATEUR */}
             <div className="form-group">
@@ -123,22 +93,6 @@ function Login() {
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
-
-            {/* EMAIL (inscription uniquement) */}
-            {isRegisterMode && (
-              <div className="form-group">
-                <label htmlFor="email">
-                  ADRESSE E-MAIL
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="admin@entreprise.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            )}
 
             {/* MOT DE PASSE */}
             <div className="form-group">
@@ -163,31 +117,27 @@ function Login() {
             </Link>
 
             {/* BOUTONS D'ACTION */}
-            <div className="login-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-
-              {/* BOKOTRA SE CONNECTER */}
+            <div className="login-buttons">
               <button
                 type="submit"
                 className="btn-login"
-                onClick={isRegisterMode ? () => setIsRegisterMode(false) : handleLogin}
                 disabled={loading}
               >
-                <span>{isRegisterMode ? '← Retour à la connexion' : (loading ? 'Connexion...' : 'Se connecter')}</span>
+                <span>{loading ? 'Connexion...' : 'Se connecter'}</span>
                 <span>→</span>
               </button>
+            </div>
 
-              {/* BOKOTRA S'INSCRIRE */}
-              <button
-                type="button"
-                className="btn-login"
-                onClick={isRegisterMode ? handleRegister : () => setIsRegisterMode(true)}
-                disabled={loading}
-              >
-                <span>{isRegisterMode ? (loading ? 'Inscription...' : 'Confirmer l\'inscription') : 'S\'inscrire'}</span>
-                <span>→</span>
-              </button>
+            {/* VERS L'INSCRIPTION */}
+            <Link
+              to="/register"
+              className="forgot-password"
+            >
+              Vous n'avez pas de compte ? S'inscrire
+            </Link>
 
-              {/* BOKOTRA ANNULER */}
+            {/* ANNULER */}
+            <div className="login-buttons">
               <button
                 type="button"
                 className="btn-cancel"
@@ -195,12 +145,12 @@ function Login() {
               >
                 Annuler
               </button>
-
             </div>
 
           </form>
 
         </div>
+
         {/* RETOUR */}
         <button
           type="button"

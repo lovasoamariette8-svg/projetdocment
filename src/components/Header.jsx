@@ -95,16 +95,6 @@ function Header({ showTitle = false }) {
     navigate('/documents', { state: { openDocumentId: document.id } })
   }
 
-  const handleLogout = async () => {
-    try {
-      await api.post('/auth/logout/')
-    } catch {
-      // on ignore les erreurs réseau, on déconnecte quand même côté client
-    }
-    sessionStorage.removeItem('isLoggedIn')
-    navigate('/login')
-  }
-
   const statusLabel = (status) => (status === 'ready' ? 'Prêt' : 'À extraire')
 
   return (
@@ -117,7 +107,12 @@ function Header({ showTitle = false }) {
           <h2>Dashboard</h2>
 
           <p>
-            Lundi, 31 Août 2026
+            {new Date().toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
           </p>
 
         </div>
@@ -230,15 +225,6 @@ function Header({ showTitle = false }) {
           </span>
 
         </div>
-
-
-        {/* LOGOUT */}
-        <button
-          className="header-logout"
-          onClick={handleLogout}
-        >
-          Déconnexion
-        </button>
 
       </div>
 

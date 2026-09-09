@@ -1,144 +1,96 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import api from "../api";
 import "./Sidebar.css";
 
 function Sidebar() {
   const navigate = useNavigate();
 
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout/");
+    } catch {
+      // on ignore les erreurs réseau, on déconnecte quand même côté client
+    }
+    sessionStorage.removeItem("isLoggedIn");
+    navigate("/login");
+  };
+
   return (
     <aside className="sidebar">
 
-      {/* 
-          LOGO */}
       <div className="sidebar-logo">
-        <div>
-          <h1>TextSim</h1>
-          <p>Analyse de texte</p>
-        </div>
+        <p className="masthead-kicker">Éditeur de textes comparés</p>
+        <h1 className="masthead-title">TextSim</h1>
+        <p className="masthead-date">N° 03 — Analyse documentaire</p>
       </div>
 
-      {/* NOUVEAU DOCUMENT */}
       <button
         className="new-document-btn"
         onClick={() => navigate("/documents")}
       >
-        <span className="material-symbols-outlined">
-          add
-        </span>
-
+        <span className="material-symbols-outlined">add</span>
         <span>Nouveau document</span>
       </button>
 
+      <span className="sidebar-menu-label">Sommaire</span>
 
-      {/* =====================================
-          MENU
-      ===================================== */}
       <nav className="sidebar-menu">
 
-        {/* ACCUEIL */}
         <NavLink
           to="/dashboard"
-          className={({ isActive }) =>
-            isActive
-              ? "sidebar-link active"
-              : "sidebar-link"
-          }
+          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}
         >
-          <span className="menu-icon">
-            <span className="material-symbols-outlined">
-              home
-            </span>
-          </span>
-
-          <span className="menu-label">
-            Accueil
-          </span>
+          <span className="menu-index">01</span>
+          <span className="menu-label">Accueil</span>
         </NavLink>
 
-
-        {/* DOCUMENTS */}
         <NavLink
           to="/documents"
-          className={({ isActive }) =>
-            isActive
-              ? "sidebar-link active"
-              : "sidebar-link"
-          }
+          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}
         >
-          <span className="menu-icon">
-            <span className="material-symbols-outlined">
-              description
-            </span>
-          </span>
-
-          <span className="menu-label">
-            Documents
-          </span>
+          <span className="menu-index">02</span>
+          <span className="menu-label">Documents</span>
         </NavLink>
 
-
-        {/* NOUVELLE ANALYSE */}
         <NavLink
           to="/analyse"
-          className={({ isActive }) =>
-            isActive
-              ? "sidebar-link active"
-              : "sidebar-link"
-          }
+          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}
         >
-          <span className="menu-icon">
-            <span className="material-symbols-outlined">
-              search
-            </span>
-          </span>
-
-          <span className="menu-label">
-            Nouvelle analyse
-          </span>
+          <span className="menu-index">03</span>
+          <span className="menu-label">Nouvelle analyse</span>
         </NavLink>
 
-
-        {/* RESULTATS */}
         <NavLink
           to="/results"
-          className={({ isActive }) =>
-            isActive
-              ? "sidebar-link active"
-              : "sidebar-link"
-          }
+          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}
         >
-          <span className="menu-icon">
-            <span className="material-symbols-outlined">
-              bar_chart
-            </span>
-          </span>
-
-          <span className="menu-label">
-            Résultats
-          </span>
+          <span className="menu-index">04</span>
+          <span className="menu-label">Résultats</span>
         </NavLink>
 
-
-        {/* PARAMETRES */}
         <NavLink
           to="/settings"
-          className={({ isActive }) =>
-            isActive
-              ? "sidebar-link active"
-              : "sidebar-link"
-          }
+          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}
         >
-          <span className="menu-icon">
-            <span className="material-symbols-outlined">
-              settings
-            </span>
-          </span>
-
-          <span className="menu-label">
-            Paramètres
-          </span>
+          <span className="menu-index">05</span>
+          <span className="menu-label">Paramètres</span>
         </NavLink>
 
       </nav>
+
+      <button
+        className="sidebar-logout-btn"
+        onClick={handleLogout}
+      >
+        <span className="material-symbols-outlined">logout</span>
+        <span>Déconnexion</span>
+      </button>
+
+      <div className="sidebar-colophon">
+        <span>Tirage quotidien</span>
+        <span>TextSim &amp; Co</span>
+        <span>— Prix : 2 €</span>
+      </div>
 
     </aside>
   );

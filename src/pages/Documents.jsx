@@ -20,6 +20,8 @@ import {
   FolderInput,
   FolderCheck,
   Pencil,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -56,6 +58,8 @@ function Documents() {
   const [moveTargets, setMoveTargets] = useState(null);
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [moving, setMoving] = useState(false);
+
+  const [showFolders, setShowFolders] = useState(true);
 
   const allowedExtensions = ["txt", "docx", "pdf"];
 
@@ -678,85 +682,109 @@ function Documents() {
     : null;
 
   return (
-    <div className="documents-layout">
+    <div className={`documents-layout ${showFolders ? "" : "folders-hidden"}`}>
       <Sidebar />
 
       {/* =====================================
           FOLDERS SIDEBAR
       ===================================== */}
-      <aside className="folders-sidebar">
-        <div className="folders-sidebar-header">
-          <span>Dossiers</span>
+      {showFolders ? (
+        <aside className="folders-sidebar">
+          <div className="folders-sidebar-header">
+            <span>Dossiers</span>
+
+            <div className="folders-sidebar-actions">
+              <button
+                className="folders-toggle-btn"
+                onClick={() => setShowFolders(false)}
+                title="Masquer les dossiers"
+              >
+                <PanelLeftClose size={15} />
+              </button>
+
+              <button
+                className="folder-add-button"
+                onClick={openCreateFolder}
+                title="Créer un dossier"
+              >
+                <FolderPlus size={18} />
+              </button>
+            </div>
+          </div>
 
           <button
-            className="folder-add-button"
-            onClick={openCreateFolder}
-            title="Créer un dossier"
+            className={`folder-item ${activeFolder === null ? "active" : ""}`}
+            onClick={() => selectFolder(null)}
           >
-            <FolderPlus size={18} />
+            <FolderOpen size={19} />
+            <span className="folder-item-name">Tous les documents</span>
+            <span className="folder-item-count">{documents.length}</span>
           </button>
-        </div>
 
-        <button
-          className={`folder-item ${activeFolder === null ? "active" : ""}`}
-          onClick={() => selectFolder(null)}
-        >
-          <FolderOpen size={19} />
-          <span className="folder-item-name">Tous les documents</span>
-          <span className="folder-item-count">{documents.length}</span>
-        </button>
+          <div className="folders-sidebar-list">
+            {folders.map((folder) => (
+              <div
+                key={folder.id}
+                className={`folder-item ${
+                  activeFolder === folder.id ? "active" : ""
+                }`}
+                onClick={() => selectFolder(folder.id)}
+              >
+                <Folder size={19} />
 
-        <div className="folders-sidebar-list">
-          {folders.map((folder) => (
-            <div
-              key={folder.id}
-              className={`folder-item ${
-                activeFolder === folder.id ? "active" : ""
-              }`}
-              onClick={() => selectFolder(folder.id)}
-            >
-              <Folder size={19} />
+                <span className="folder-item-name">{folder.name}</span>
 
-              <span className="folder-item-name">{folder.name}</span>
+                <span className="folder-item-count">
+                  {folder.documentCount}
+                </span>
 
-              <span className="folder-item-count">
-                {folder.documentCount}
-              </span>
+                <div className="folder-item-actions">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditFolder(folder);
+                    }}
+                    title="Renommer"
+                  >
+                    <Pencil size={15} />
+                  </button>
 
-              <div className="folder-item-actions">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openEditFolder(folder);
-                  }}
-                  title="Renommer"
-                >
-                  <Pencil size={15} />
-                </button>
-
-                <button
-                  className="folder-delete-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteFolder(folder);
-                  }}
-                  title="Supprimer"
-                >
-                  <Trash2 size={15} />
-                </button>
+                  <button
+                    className="folder-delete-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteFolder(folder);
+                    }}
+                    title="Supprimer"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {folders.length === 0 && (
-          <div className="folders-sidebar-empty">
-            <Folder size={22} />
-
-            <p>Aucun dossier pour le moment.</p>
+            ))}
           </div>
-        )}
-      </aside>
+
+          {folders.length === 0 && (
+            <div className="folders-sidebar-empty">
+              <Folder size={22} />
+
+              <p>Aucun dossier pour le moment.</p>
+            </div>
+          )}
+        </aside>
+      ) : (
+        <aside className="folders-sidebar-rail">
+          <button
+            className="folders-rail-toggle"
+            onClick={() => setShowFolders(true)}
+            title="Afficher les dossiers"
+          >
+            <PanelLeftOpen size={16} />
+          </button>
+
+          <span className="folders-rail-label">Dossiers</span>
+        </aside>
+      )}
 
       <main className="documents-content">
         {/* =====================================
